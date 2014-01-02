@@ -39,12 +39,12 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.sap.research.primelife</groupId>
 			<artifactId>ppl-test</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 		    <groupId>javax.mail</groupId>
 		    <artifactId>mail</artifactId>
