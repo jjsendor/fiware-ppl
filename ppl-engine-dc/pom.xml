@@ -14,14 +14,6 @@
 
 	<name>Data Controller</name>
 
-	<repositories>
-		<repository>
-			<id>mockito-repository</id>
-			<name>Maven Repository for Mockito</name>
-			<url>http://repo2.maven.org/maven2/org/mockito/mockito-all</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.sap.research.primelife</groupId>

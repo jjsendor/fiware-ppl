@@ -13,14 +13,6 @@
 	<packaging>jar</packaging>
 
 	<name>Data Subject</name>
-	
-	<repositories>
-		<repository>
-			<id>mockito-repository</id>
-			<name>Maven Repository for Mockito</name>
-			<url>http://repo2.maven.org/maven2/org/mockito/mockito-all</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		
