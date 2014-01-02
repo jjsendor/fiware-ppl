@@ -24,7 +24,7 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-			<url>http://maven.herasaf.org/repo/org/herasaf/xacml/core/herasaf-xacml-core/</url>
+			<url>http://maven.herasaf.org/repo/</url>
 		</repository>
 		<repository>
 			<id>mockito-repository</id>
