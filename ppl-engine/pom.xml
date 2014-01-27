@@ -18,6 +18,7 @@
 		<module>../database-reset</module>
 		<module>../ppl-message</module>
 		<module>../ppl-rest</module>
+		<module>../ppl-rest-client</module>
 	</modules>
 
 	<organization>
