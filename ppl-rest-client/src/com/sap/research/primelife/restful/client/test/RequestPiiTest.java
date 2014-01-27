@@ -51,7 +51,7 @@ import com.sun.jersey.multipart.impl.MultiPartReaderClientSide;
 
 public class RequestPiiTest {
 
-	private static final String SERVER_URL = "http://localhost:9998/downstreamusage";
+	private static final String SERVER_URL = "http://localhost:8080/downstreamusage";
 
 	public void run() throws IOException {
 		System.out.println("Running RequestPii test ...");

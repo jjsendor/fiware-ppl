@@ -29,21 +29,26 @@
  ******************************************************************************/
 package com.sap.research.primelife.restful.client.test;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sap.research.primelife.exceptions.WritingException;
+import com.sap.research.primelife.marshalling.MarshallImpl;
 import com.sap.research.primelife.message.request.PiiCreateRequest;
-import com.sap.research.primelife.message.service.JsonService;
 import com.sap.research.primelife.restful.client.file.PolicyGenerator;
-import com.sap.research.primelife.restful.client.service.PolicyService;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -59,28 +64,33 @@ import eu.primelife.ppl.stickypolicy.impl.StickyPolicy;
  */
 public class CreatePiiTest {
 
-private static final String FOLDER = "C://test-file//";
-	
-	private static final String SERVER_URL = "http://10.55.133.99:9998/pii";
+
+	private static final String SERVER_URL = "http://localhost:8080/ppl-rest/pii";
 	PolicyGenerator pg = new PolicyGenerator();
 	
 	public void run() throws IOException {
 		System.out.println("Running CreatePii test ...");
 		
-		String fileName = "Penguins.jpg";
+		String fileName = "test.txt";
 		List<String> delegates = new ArrayList<String>();
-		delegates.add("toto@sap.com");
+		delegates.add("bob@example.com");
 		List<String> fileNames = new ArrayList<String>();
 		fileNames.add(fileName);
-		String notify = "paul.cervera.y.alvarez@sap.com";
+		String notify = "alice@example.com";
 		
 		createPii(fileName, delegates, fileNames, notify);
 	}
 	
 	private Long createPii(String fileName, List<String> delegates, List<String> fileNames, String notify){
-		
-		String filePath = FOLDER + fileName;
-		File file = new File(filePath);
+		File file = null;
+
+		try {
+			URI fileURI = getClass().getResource("/" + fileName).toURI();
+			file = new File(fileURI);
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		
 		StickyPolicy stickyPolicy = pg.buildStickyPolicy(delegates, notify, "", fileNames);
@@ -90,7 +100,7 @@ private static final String FOLDER = "C://test-file//";
 		JSONObject jsob;
 		try {
 			jsob = new JSONObject(ret);
-			String uniqueIdStr = (String) jsob.get("uniqueId");
+			String uniqueIdStr = jsob.get("uniqueId").toString();
 			return Long.parseLong(uniqueIdStr);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -119,19 +129,32 @@ private static final String FOLDER = "C://test-file//";
 				request.setOwner((long) 1);
 				request.setStickyPolicy(stickyPolicy);
 				
-				JsonService js = new JsonService();
+//				JsonService js = new JsonService();
 				
 				FormDataMultiPart form = new FormDataMultiPart();
 				form.bodyPart(new FileDataBodyPart("file", file));
-				form.field("request", js.serialize(request));
-				 response = webResource
+				form.field("stickyPolicy", marshal(stickyPolicy));
+				form.field("owner", String.valueOf(1));
+				//System.out.println("Serialized request:" + js.serialize(request));
+				//form.field("request", js.serialize(request));
+				response = webResource
 							.type(MediaType.MULTIPART_FORM_DATA)
 							.accept(MediaType.APPLICATION_JSON)
 							.put(ClientResponse.class, form);
 			}
 	
 			if (response.getStatus() != 201) {
-				System.out.println("Fi-ware return error status: " + response.getStatus());
+				System.err.println("Fi-ware return error status: " + response.getStatus());
+				System.err.println("Response: ");
+
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(response.getEntityInputStream()));
+
+				while (reader.ready()) {
+					System.err.println(reader.readLine());
+				}
+
+				return null;
 			}
 			
 			String repStr = response.getEntity(String.class);
@@ -143,5 +166,14 @@ private static final String FOLDER = "C://test-file//";
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	private String marshal(StickyPolicy stickyPolicy)
+			throws JAXBException, WritingException {
+		MarshallImpl marshaller =
+				new MarshallImpl(StickyPolicy.class.getPackage());
+		StringWriter writer = new StringWriter();
+		marshaller.marshal(stickyPolicy, writer);
+		return writer.toString();
 	}
 }

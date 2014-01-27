@@ -58,7 +58,7 @@ public class DeletePiiTest {
 	
 private static final String FOLDER = "C://test-file//";
 	
-	private static final String SERVER_URL = "http://localhost:9998/pii";
+	private static final String SERVER_URL = "http://localhost:8080/pii";
 
 	public void run() throws IOException {
 		System.out.println("Running Delete Pii test ...");
