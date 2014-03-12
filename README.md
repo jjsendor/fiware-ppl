@@ -41,19 +41,16 @@ https://github.com/inria-db/accountability-ppl
 
 Download the code, for instance by clicking on the Download ZIP button on the right-hand side of the page.
 
-Next, download and install the Haskell Platform from here [1], or alternatively only the GHC Haskell compiler from [2].
+Next, download and install the [Haskell Platform](http://www.haskell.org/platform/) or alternatively only the [GHC Haskell compiler](http://www.haskell.org/ghc/).
 
 The feature can then be compiled as follows from a command prompt, in the directory of its source code:
 
-ghc loganalyser.hs
+> ghc loganalyser.hs
 
 Compliance checks can be performed directly, without preliminary parameterization. It is sufficient to run the executable as follows:
 
-./loganalyser piiId
+> ./loganalyser piiId
 
 Where piiId is an integer (the identifying number of the PII for which to perform the check).
 
-The feature concatenates and analyses all log files in the working folder. Both logs from the event handler (*.event.log) and from the MySQL database (*.mysql.log) are processed. The log analyser tool displays the list of data handling events in a standardised format, as well as the sticky policy, and the conclusion of the compliance check. 
-
-[1]: http://www.haskell.org/platform/
-[2]: http://www.haskell.org/ghc/
+The feature concatenates and analyses all log files in the working folder. Both logs from the event handler (*.event.log) and from the MySQL database (*.mysql.log) are processed. The log analyser tool displays the list of data handling events in a standardised format, as well as the sticky policy, and the conclusion of the compliance check.
