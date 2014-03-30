@@ -20,6 +20,7 @@
 		<module>../ppl-message</module>
 		<module>../ppl-rest</module>
 		<module>../ppl-rest-client</module>
+		<module>../event-handler</module>
 		<module>../action-handler</module>
 		<module>../logging-handler</module>
 	</modules>
