@@ -23,6 +23,7 @@
 		<module>../event-handler</module>
 		<module>../action-handler</module>
 		<module>../logging-handler</module>
+		<module>../pap</module>
 	</modules>
 
 	<organization>
