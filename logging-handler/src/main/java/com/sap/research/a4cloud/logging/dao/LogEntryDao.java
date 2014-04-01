@@ -51,8 +51,8 @@ public class LogEntryDao extends DaoImpl<LogEntry> {
 	public List<LogEntry> find(String attributeName, String attributeValue) {
 		Query query = em.createQuery("SELECT logEntry FROM "
 				+ LogEntry.class.getName()
-				+ " logEntry where logEntry.piiAttributeName = :attributeName"
-				+ " logEntry where logEntry.piiAttributeValue = :attributeValue"
+				+ " logEntry WHERE logEntry.piiAttributeName = :attributeName"
+				+ " AND logEntry.piiAttributeValue = :attributeValue"
 				+ " ORDER BY logEntry.date ASC");
 
 		query.setParameter("attributeName", attributeName);
@@ -73,8 +73,8 @@ public class LogEntryDao extends DaoImpl<LogEntry> {
 	@SuppressWarnings("unchecked")
 	public List<LogEntry> findByOwner(String owner) {
 		Query query = em.createQuery("SELECT logEntry FROM "
-				+ LogEntry.class.getName()
-				+ " logEntry where logEntry.owner = :owner"
+				+ LogEntry.class.getSimpleName()
+				+ " logEntry WHERE logEntry.owner = :owner"
 				+ " ORDER BY logEntry.date ASC");
 
 		query.setParameter("owner", owner);
