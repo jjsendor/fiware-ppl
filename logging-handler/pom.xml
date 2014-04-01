@@ -7,7 +7,8 @@
     <relativePath>../ppl-engine</relativePath>
   </parent>
   <artifactId>logging-handler</artifactId>
-  <name>Provides common logging interface for all PPL Engine components</name>
+  <name>Logging Handler</name>
+  <description>Provides common logging interface for all PPL Engine components</description>
   <dependencies>
     <dependency>
       <groupId>com.sap.research.primelife</groupId>
