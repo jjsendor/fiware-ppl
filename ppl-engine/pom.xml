@@ -8,8 +8,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>FI-WARE</name>
-	<url>http://www.fi-ware.eu</url>
+	<name>A-PPL-E</name>
+	<url>http://www.a4cloud.eu</url>
 
 	<modules>
 		<module>../ppl-schema</module>
