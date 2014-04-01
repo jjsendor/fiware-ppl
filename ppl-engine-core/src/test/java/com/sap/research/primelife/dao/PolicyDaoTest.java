@@ -70,7 +70,6 @@ public class PolicyDaoTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DaoInitializer.getInstance();
 		unmarshaller = new UnmarshallImpl(PolicyType.class.getPackage());
 		dao = new DaoImpl<PolicyType>();
 		polDao = new PolicyDao();
@@ -94,9 +93,7 @@ public class PolicyDaoTest {
 		assertNotNull(policy.getHjid());
 
 		Query query;
-		EntityManager em;
-
-		em = DaoInitializer.getInstance().getEntityManager();
+		EntityManager em = DaoInitializer.getEntityManager();
 		query = em.createQuery("SELECT p FROM " + PolicyType.class.getName() +" p where p.hjid = :id");
 		query.setParameter("id", policy.getHjid());
 

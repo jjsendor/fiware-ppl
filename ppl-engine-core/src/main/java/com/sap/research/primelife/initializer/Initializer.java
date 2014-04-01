@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.sap.research.primelife.dao.DaoInitializer;
 
 /**
- * The initializer of the PPL Enginge.
+ * The initializer of the PPL Engine.
  * It uses the Singleton Design Pattern to have only one instance of all the initializer.
  * 
  * @Version 0.1
@@ -52,29 +52,17 @@ public class Initializer {
 	/**
 	 * Protected constructor prevents instantiation from other classes
 	 */
-	protected Initializer() {
+	private Initializer() {
 	}
 
 	/**
-	 * Call this method to start the initializer for the default persistence unit ("primelifePU")
+	 * Initializes the engine.
 	 * @return instance of the class
 	 */
 	public static Initializer getInstance() {
 		LOGGER.info("Starting PPL Engine initilization...");
 		herasInit();
-		DaoInitializer.getInstance();
-
-		return INSTANCE;
-	}
-
-	/**
-	 * Call this method to start the initializer
-	 * @return instance of the class
-	 */
-	public static Initializer getInstance(String persistenceUnitName) {
-		LOGGER.info("Starting PPL Engine initilization...");
-		herasInit();
-		DaoInitializer.getInstance(persistenceUnitName);
+		DaoInitializer.getEntityManager();
 
 		return INSTANCE;
 	}

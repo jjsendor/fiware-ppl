@@ -72,7 +72,6 @@ public class PiiDaoTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		DaoInitializer.getInstance();
 		dao = new DaoImpl<PolicyType>();
 		piiDao = new PiiDao();
 		ofPii = new ObjectFactory();

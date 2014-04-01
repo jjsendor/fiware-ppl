@@ -15,7 +15,7 @@
 	<properties>
 	</properties>
 
-	<description>Drops and creates new database schemas for DS, DC and Third Party.</description>
+	<description>Drops and creates new database schema</description>
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
@@ -32,7 +32,7 @@
 						<configuration>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.sap.research.primelife.dao.FullDaoInitializer</mainClass>
+									<mainClass>com.sap.research.primelife.db.reset.DatabaseReset</mainClass>
 									<manifestEntries>
 									 	<Class-Path>./ </Class-Path>
 									 </manifestEntries>

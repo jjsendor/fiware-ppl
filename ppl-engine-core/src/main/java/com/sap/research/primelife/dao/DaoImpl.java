@@ -52,12 +52,11 @@ import com.sap.research.primelife.exceptions.ValidationException;
  */
 public class DaoImpl <T> implements IDao <T> {
 
-	//@PersistenceContext(unitName = "primelifePU")
 	protected EntityManager em;
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoImpl.class);
 
 	public DaoImpl(){
-		em = DaoInitializer.getInstance().getEntityManager();
+		em = DaoInitializer.getEntityManager();
 	}
 
 	/* (non-Javadoc)
@@ -172,13 +171,6 @@ public class DaoImpl <T> implements IDao <T> {
 		}
 
 		return object;
-	}
-
-	/**
-	 * @return the em
-	 */
-	public EntityManager getEm() {
-		return em;
 	}
 
 }
