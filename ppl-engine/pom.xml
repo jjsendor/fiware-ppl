@@ -24,6 +24,7 @@
 		<module>../action-handler</module>
 		<module>../logging-handler</module>
 		<module>../pap</module>
+		<module>../obligation-handler</module>
 	</modules>
 
 	<organization>
