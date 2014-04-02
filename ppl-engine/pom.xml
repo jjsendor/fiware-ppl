@@ -25,6 +25,7 @@
 		<module>../logging-handler</module>
 		<module>../pap</module>
 		<module>../obligation-handler</module>
+		<module>../pep</module>
 	</modules>
 
 	<organization>
