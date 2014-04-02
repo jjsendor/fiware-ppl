@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.logging;
+package com.sap.a4cloud.apple.logging;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
@@ -44,8 +44,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sap.research.a4cloud.logging.dao.LogEntryDao;
-import com.sap.research.a4cloud.logging.entity.LogEntry;
+import com.sap.a4cloud.apple.logging.LoggerHandler;
+import com.sap.a4cloud.apple.logging.dao.LogEntryDao;
+import com.sap.a4cloud.apple.logging.entity.LogEntry;
 
 import eu.primelife.ppl.pii.impl.PIIType;
 
@@ -74,7 +75,7 @@ public class LoggerHandlerTest {
 				return logEntry.getId() == null
 						&& logEntry.getMesssage() == "test message"
 						&& logEntry.getDate() == null
-						&& logEntry.getOwner() == null
+						&& logEntry.getPiiOwner() == null
 						&& logEntry.getPiiAttributeName() == null
 						&& logEntry.getPiiAttributeValue() == null;
 			}
@@ -99,7 +100,7 @@ public class LoggerHandlerTest {
 				return logEntry.getId() == null
 						&& logEntry.getMesssage() == "test message 2"
 						&& logEntry.getDate() == null
-						&& logEntry.getOwner() == "Bob"
+						&& logEntry.getPiiOwner() == "Bob"
 						&& logEntry.getPiiAttributeName() == "name"
 						&& logEntry.getPiiAttributeValue() == "Robert";
 			}

@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.logging.entity;
+package com.sap.a4cloud.apple.logging.entity;
 
 import java.util.Date;
 
@@ -51,7 +51,7 @@ public class LogEntry {
 	private String piiAttributeName;
 	private String piiAttributeValue;
 	private String piiOwner;
-	private String msg;
+	private String message;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -88,12 +88,12 @@ public class LogEntry {
 		this.piiAttributeValue = piiAttributeValue;
 	}
 
-	public String getOwner() {
+	public String getPiiOwner() {
 		return piiOwner;
 	}
 
-	public void setOwner(String owner) {
-		this.piiOwner = owner;
+	public void setPiiOwner(String piiOwner) {
+		this.piiOwner = piiOwner;
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class LogEntry {
 	 * @return the log entry message
 	 */
 	public String getMesssage() {
-		return msg;
+		return message;
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class LogEntry {
 	 * @param message	the log entry message to set
 	 */
 	public void setMesssage(String message) {
-		this.msg = message;
+		this.message = message;
 	}
 
 }

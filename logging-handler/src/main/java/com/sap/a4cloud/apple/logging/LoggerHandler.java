@@ -27,12 +27,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.logging;
+package com.sap.a4cloud.apple.logging;
 
 import java.util.List;
 
-import com.sap.research.a4cloud.logging.dao.LogEntryDao;
-import com.sap.research.a4cloud.logging.entity.LogEntry;
+import com.sap.a4cloud.apple.logging.dao.LogEntryDao;
+import com.sap.a4cloud.apple.logging.entity.LogEntry;
 
 import eu.primelife.ppl.pii.impl.PIIType;
 
@@ -87,7 +87,7 @@ public class LoggerHandler implements ILoggerHandler {
 		LogEntry piih = new LogEntry();
 		piih.setPiiAttributeName(pii.getAttributeName());
 		piih.setPiiAttributeValue(pii.getAttributeValue());
-		piih.setOwner(pii.getOwner());
+		piih.setPiiOwner(pii.getOwner());
 		return piih;
 	}
 

@@ -27,13 +27,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.logging.dao;
+package com.sap.a4cloud.apple.logging.dao;
 
 import java.util.List;
 
 import javax.persistence.Query;
 
-import com.sap.research.a4cloud.logging.entity.LogEntry;
+import com.sap.a4cloud.apple.logging.entity.LogEntry;
 import com.sap.research.primelife.dao.DaoImpl;
 
 public class LogEntryDao extends DaoImpl<LogEntry> {

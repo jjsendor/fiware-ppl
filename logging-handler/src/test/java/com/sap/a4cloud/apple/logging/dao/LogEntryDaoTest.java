@@ -1,4 +1,4 @@
-package com.sap.research.a4cloud.logging.dao;
+package com.sap.a4cloud.apple.logging.dao;
 
 import static org.junit.Assert.*;
 
@@ -7,7 +7,8 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sap.research.a4cloud.logging.entity.LogEntry;
+import com.sap.a4cloud.apple.logging.dao.LogEntryDao;
+import com.sap.a4cloud.apple.logging.entity.LogEntry;
 
 public class LogEntryDaoTest {
 
@@ -47,35 +48,35 @@ public class LogEntryDaoTest {
 		logEntry1.setPiiAttributeName("family name");
 		logEntry1.setPiiAttributeValue("Doe");
 		logEntry1.setMesssage("PII accessed");
-		logEntry1.setOwner("John Doe");
+		logEntry1.setPiiOwner("John Doe");
 		dao.persistObject(logEntry1);
 
 		LogEntry logEntry2 = new LogEntry();
 		logEntry2.setPiiAttributeName("given name");
 		logEntry2.setPiiAttributeValue("John");
 		logEntry2.setMesssage("PII send");
-		logEntry2.setOwner("John Doe");
+		logEntry2.setPiiOwner("John Doe");
 		dao.persistObject(logEntry2);
 
 		LogEntry logEntry3 = new LogEntry();
 		logEntry3.setPiiAttributeName("family name");
 		logEntry3.setPiiAttributeValue("Doe");
 		logEntry3.setMesssage("PII accessed");
-		logEntry3.setOwner("Jane Doe");
+		logEntry3.setPiiOwner("Jane Doe");
 		dao.persistObject(logEntry3);
 
 		LogEntry logEntry4 = new LogEntry();
 		logEntry4.setPiiAttributeName("given name");
 		logEntry4.setPiiAttributeValue("Jane");
 		logEntry4.setMesssage("PII send");
-		logEntry4.setOwner("Jane Doe");
+		logEntry4.setPiiOwner("Jane Doe");
 		dao.persistObject(logEntry4);
 
 		List<LogEntry> logEntries = dao.findByOwner("Jane Doe");
 		assertEquals(2, logEntries.size());
 
 		for (LogEntry logEntry : logEntries) {
-			assertEquals("Jane Doe", logEntry.getOwner());
+			assertEquals("Jane Doe", logEntry.getPiiOwner());
 		}
 	}
 
