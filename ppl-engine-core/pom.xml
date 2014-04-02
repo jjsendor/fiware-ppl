@@ -14,25 +14,6 @@
 
 	<name>PPL Engine Core</name>
 
-	<repositories>
-		<repository>
-			<id>maven.herasaf.org-releases</id>
-			<name>maven.herasaf.org-releases</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<url>http://maven.herasaf.org/repo/</url>
-		</repository>
-		<repository>
-			<id>mockito-repository</id>
-			<name>Maven Repository for Mockito</name>
-			<url>http://repo2.maven.org/maven2/org/mockito/mockito-all</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		
 		<dependency>
@@ -40,19 +21,7 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>2.1</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.herasaf.xacml.core</groupId>
-			<artifactId>herasaf-xacml-core</artifactId>
-			<version>1.0.0-M1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-			</exclusions> 
-		</dependency>
-		
+
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
