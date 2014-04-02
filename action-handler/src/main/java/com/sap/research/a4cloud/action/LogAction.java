@@ -29,6 +29,12 @@
  ******************************************************************************/
 package com.sap.research.a4cloud.action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sap.a4cloud.apple.logging.dao.LogEntryDao;
+import com.sap.a4cloud.apple.logging.entity.LogEntry;
+
 /**
  * Logs the event associated with the obligation that triggered this action.
  *
@@ -37,13 +43,42 @@ package com.sap.research.a4cloud.action;
  */
 public class LogAction implements Action {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
+
+	private String message;
+	private String piiAttributeName;
+	private String piiOwner;
+
+	/**
+	 * Creates LogAction with a given log message, the PII attribute name and
+	 * the PII owner.
+	 *
+	 * @param message				the log message
+	 * @param piiAttributeName		the PII attribute name
+	 * @param piiOwner				the PII owner
+	 */
+	public LogAction(String message, String piiAttributeName,
+			String piiOwner) {
+		this.message = message;
+		this.piiAttributeName = piiAttributeName;
+		this.piiOwner = piiOwner;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.sap.research.a4cloud.action.Action#execute()
 	 */
 	@Override
 	public void execute() {
-		// TODO Auto-generated method stub
+		LogEntryDao dao = new LogEntryDao();
+		LogEntry logEntry = new LogEntry();
 
+		logEntry.setMesssage(message);
+		logEntry.setPiiAttributeName(piiAttributeName);
+		logEntry.setPiiOwner(piiOwner);
+
+		dao.persistObject(logEntry);
+		LOGGER.info("Executed log action for PII {} owned by {}",
+				piiAttributeName, piiOwner);
 	}
 
 }

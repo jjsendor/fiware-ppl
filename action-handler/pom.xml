@@ -9,4 +9,11 @@
   <artifactId>action-handler</artifactId>
   <name>Action Handler</name>
   <description>Executes the actions associated with the PPL obligations</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>logging-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>

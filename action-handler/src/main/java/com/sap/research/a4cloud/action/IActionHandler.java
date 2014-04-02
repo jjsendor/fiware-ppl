@@ -29,50 +29,20 @@
  ******************************************************************************/
 package com.sap.research.a4cloud.action;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Notifies the recipient associated with the obligation about the event
- * that triggered this actions.
+ * Action Handler interface for executing actions associated with the
+ * obligations.
  *
  * @author Jakub Sendor
  *
  */
-public class NotifyAction implements Action {
-
-	private static Logger LOGGER = LoggerFactory.getLogger(NotifyAction.class);
-
-	private String media;
-	private String address;
-	private String receipient;
-	private String message;
+public interface IActionHandler {
 
 	/**
-	 * Constructs NotifyAction using given media channel, address, recipient
-	 * and notification message.
+	 * Executes the action.
 	 *
-	 * @param media			notification channel media type
-	 * @param address		notification channel address
-	 * @param recipient	notification channel recipient
-	 * @param message
+	 * @param action	action to be executed
 	 */
-	public NotifyAction(String media, String address, String recipient,
-			String message) {
-		this.media = media;
-		this.address = address;
-		this.receipient = recipient;
-		this.message = message;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.Action#execute()
-	 */
-	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-
-	}
+	public void handle(Action action);
 
 }
