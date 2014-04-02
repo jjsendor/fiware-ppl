@@ -26,6 +26,7 @@
 		<module>../pap</module>
 		<module>../obligation-handler</module>
 		<module>../pep</module>
+		<module>../pdp</module>
 	</modules>
 
 	<organization>
