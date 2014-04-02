@@ -134,6 +134,26 @@ public class PiiDao extends DaoImpl<PIIType> {
         return (List<PIIType>) query.getResultList();
     }
     
+
+	/**
+	 * Finds all PII with a given attribute name and owner.
+	 * @param attributeName	the PII attribute name
+	 * @param owner			the PII owner
+	 * @return a list of PII
+	 */
+	@SuppressWarnings("unchecked")
+	public List<PIIType> findAllByAttributeNameAndOwner(String attributeName,
+			String owner) {
+		Query query = em.createQuery("SELECT pii FROM "
+				+ PIIType.class.getName()
+				+ " pii WHERE pii.attributeName = :name"
+				+ " AND pii.owner = :owner");
+		query.setParameter("name", attributeName);
+		query.setParameter("owner", owner);
+
+		return query.getResultList();
+	}
+	
 	/**
 	 * Return a list of all PII in the database.
 	 * @return
