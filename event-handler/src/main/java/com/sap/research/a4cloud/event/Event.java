@@ -31,8 +31,6 @@ package com.sap.research.a4cloud.event;
 
 import java.util.Date;
 
-import eu.primelife.ppl.pii.impl.PIIType;
-
 /**
  * Interface represents event that triggers obligation in PPL.
  *
@@ -42,20 +40,46 @@ import eu.primelife.ppl.pii.impl.PIIType;
 public interface Event {
 
 	/**
-	 * Returns PII associated with this event. In case there is not PII
-	 * associated it returns <code>null</code>.
+	 * Returns the id of the PII associated with this event.
 	 *
-	 * @return	PII associated with this event or <code>null</code> if there is
-	 * 			no associated PII.
+	 * @return	the id of the PII associated with this event
 	 */
-	public PIIType getPii();
+	public Long getPiiId();
 
 	/**
-	 * Sets PII associated with this event.
+	 * Sets the id of the PII associated with this event.
 	 *
-	 * @param pii	associated PII
+	 * @param piiId	the id of the associated PII
 	 */
-	public void setPii(PIIType pii);
+	public void setPiiId(Long piiId);
+
+	/**
+	 * Returns the attribute name of the PII associated with this event.
+	 *
+	 * @return	the attribute name of the PII associated with this event
+	 */
+	public String getPiiAttributeName();
+
+	/**
+	 * Sets the attribute name of the PII associated with this event.
+	 *
+	 * @param piiAttributeName	the attribute name of the associated PII
+	 */
+	public void setPiiAttributeName(String piiAttributeName);
+
+	/**
+	 * Returns the owner of the PII associated with this event.
+	 *
+	 * @return	the owner of the PII associated with this event
+	 */
+	public String getPiiOwner();
+
+	/**
+	 * Sets the id of the PII associated with this event.
+	 *
+	 * @param piiOwner	the owner of the associated PII
+	 */
+	public void setPiiOwner(String piiOwner);
 
 	/**
 	 * Returns the date when the event occurred.

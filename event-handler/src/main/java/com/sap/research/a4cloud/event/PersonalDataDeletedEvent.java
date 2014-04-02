@@ -38,24 +38,4 @@ package com.sap.research.a4cloud.event;
  */
 public class PersonalDataDeletedEvent extends AbstractEvent implements Event {
 
-	private String type;
-
-	/**
-	 * Returns the personal data type.
-	 *
-	 * @return	the personal data type
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * Sets the personal data type.
-	 *
-	 * @param type	the personal data type
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
-
 }

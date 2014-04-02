@@ -31,8 +31,6 @@ package com.sap.research.a4cloud.event;
 
 import java.util.Date;
 
-import eu.primelife.ppl.pii.impl.PIIType;
-
 /**
  * Abstract event class serving as a stub for the concrete event implementations.
  *
@@ -41,23 +39,39 @@ import eu.primelife.ppl.pii.impl.PIIType;
  */
 public abstract class AbstractEvent implements Event {
 
-	private PIIType pii;
+	private Long piiId;
+	private String piiAttributeName;
+	private String piiOwner;
 	private Date date;
 
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.event.Event#getPii()
-	 */
 	@Override
-	public PIIType getPii() {
-		return pii;
+	public Long getPiiId() {
+		return piiId;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.event.Event#setPii(eu.primelife.ppl.pii.impl.PIIType)
-	 */
+
 	@Override
-	public void setPii(PIIType pii) {
-		this.pii = pii;
+	public void setPiiId(Long piiId) {
+		this.piiId = piiId;
+	}
+
+	@Override
+	public String getPiiAttributeName() {
+		return piiAttributeName;
+	}
+
+	@Override
+	public void setPiiAttributeName(String piiAttributeName) {
+		this.piiAttributeName = piiAttributeName;
+	}
+
+	@Override
+	public String getPiiOwner() {
+		return piiOwner;
+	}
+
+	@Override
+	public void setPiiOwner(String piiOwner) {
+		this.piiOwner = piiOwner;
 	}
 
 	/* (non-Javadoc)
