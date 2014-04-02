@@ -29,8 +29,16 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.pdp;
 
-import com.sap.a4cloud.apple.pdp.request.PdpRequest;
+import javax.xml.bind.JAXBException;
 
+import org.herasaf.xacml.core.SyntaxException;
+import org.herasaf.xacml.core.context.impl.DecisionType;
+
+import com.sap.a4cloud.apple.pdp.access.AccessControl;
+import com.sap.a4cloud.apple.pdp.request.PdpRequest;
+import com.sap.research.primelife.exceptions.WritingException;
+
+import eu.primelife.ppl.policy.impl.PolicySetType;
 import eu.primelife.ppl.policy.impl.PolicyType;
 
 /**
@@ -43,7 +51,7 @@ import eu.primelife.ppl.policy.impl.PolicyType;
 public class PDP {
 
 	/**
-	 * Evaluates authorization request against given policy.
+	 * Evaluates authorization request against a given policy.
 	 *
 	 * @param request	the authorization request
 	 * @param policy	the policy against which the request is evaluated
@@ -52,6 +60,61 @@ public class PDP {
 	 * 			<code>false</code> if it is denied
 	 */
 	public boolean decide(PdpRequest request, PolicyType policy) {
+		// TODO add usage control (check purpose)
+		AccessControl ac = new AccessControl();
+		DecisionType decision = null;
+
+		try {
+			decision = ac.evaluate(request.toXacmlRequest(), policy);
+			return DecisionType.PERMIT.equals(decision);
+		} catch (WritingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (com.sap.research.primelife.exceptions.SyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	/**
+	 * Evaluates authorization request against a given policy set.
+	 *
+	 * @param request	the authorization request
+	 * @param policySet	the policy against which the request is evaluated
+	 *
+	 * @return	<code>true</code> if the authorization is granted,
+	 * 			<code>false</code> if it is denied
+	 */
+	public boolean decide(PdpRequest request, PolicySetType policySet) {
+		// TODO add usage control (check purpose)
+		AccessControl ac = new AccessControl();
+		DecisionType decision = null;
+
+		try {
+			decision = ac.evaluate(request.toXacmlRequest(), policySet);
+			return DecisionType.PERMIT.equals(decision);
+		} catch (WritingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (com.sap.research.primelife.exceptions.SyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return false;
 	}
 

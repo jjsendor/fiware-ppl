@@ -27,9 +27,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.utils;
+package com.sap.a4cloud.apple.pdp.access;
 
-import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -37,7 +36,6 @@ import java.io.StringWriter;
 import javax.xml.bind.JAXBException;
 
 import org.herasaf.xacml.core.policy.PolicyConverter;
-import org.herasaf.xacml.core.policy.impl.TargetType;
 
 import com.sap.research.primelife.exceptions.SyntaxException;
 import com.sap.research.primelife.exceptions.WritingException;
@@ -62,80 +60,6 @@ import eu.primelife.ppl.policy.xacml.impl.PolicyTypeCombinerParametersOrRuleComb
  * 
  */
 public class ConverterFunctions {
-
-	/**
-	 * Convert PPL Target to Heras Target. This is by meaning of canonical format and types.
-	 * @param PPL Target
-	 * 		PPL Target
-	 * @return
-	 * 		Heras Target
-	 * @throws WritingException
-	 * @throws SyntaxException
-	 * @throws FileNotFoundException
-	 * @throws org.herasaf.xacml.core.SyntaxException
-	 * @throws JAXBException
-	 */
-	public static TargetType fromPPLTargetToHerasTarget(
-			eu.primelife.ppl.policy.xacml.impl.TargetType pPLTarget)
-			throws WritingException, SyntaxException, FileNotFoundException,
-			org.herasaf.xacml.core.SyntaxException, JAXBException {
-		MarshallImpl marshaller = MarshallFactory.createMarshallImpl(eu.primelife.ppl.policy.xacml.impl.TargetType.class.getPackage(), false);  
-//			new MarshallImpl(eu.primelife.ppl.policy.xacml.impl.TargetType.class.getPackage(), false);
-
-		ObjectFactory ofPrimelife = new ObjectFactory();
-		PolicyType policyForTarget = ofPrimelife.createPolicyType();
-		eu.primelife.ppl.policy.xacml.impl.TargetType targetCopy = new eu.primelife.ppl.policy.xacml.impl.TargetType();
-
-		targetCopy.setActions(pPLTarget.getActions());
-		targetCopy.setEnvironments(pPLTarget.getEnvironments());
-		targetCopy.setResources(pPLTarget.getResources());
-		targetCopy.setSubjects(pPLTarget.getSubjects());
-//		targetCopy.setHjid(null);
-
-//		policyForTarget.setHjid(null);
-
-//		targetCopy.getSubjects().setHjid(null);
-
-		// modify objects being iterated, delete the 'hjid' and other unuseless  attribute
-//		ListIterator<SubjectType> litrSubject =
-//			((List<SubjectType>) targetCopy.getSubjects().getSubject())
-//			.listIterator();
-
-//		while (litrSubject.hasNext()) {
-//			SubjectType subject = (SubjectType) litrSubject.next(); 
-//			subject.setHjid(null);
-
-//			ListIterator<SubjectMatchType> litrSubjectMatch =
-//				subject.getSubjectMatch().listIterator();
-
-//			while (litrSubjectMatch.hasNext()) {
-//				SubjectMatchType subjectMatch =
-//					(SubjectMatchType) litrSubjectMatch.next(); 
-//				subjectMatch.setHjid(null);
-
-//				subjectMatch.getAttributeValue().setHjid(null);
-//				subjectMatch.getSubjectAttributeDesignator().setHjid(null);
-//				subjectMatch.getSubjectAttributeDesignator().setMustBePresent(null);
-//			}
-//		}
-
-		policyForTarget.setTarget(targetCopy);
-		policyForTarget.setRuleCombiningAlgId("urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:permit-overrides");
-		policyForTarget.setPolicyId("policyConvertion");
-
-		TargetType result = null;
-		StringWriter out = new StringWriter();
-
-		marshaller.marshal(ofPrimelife.createPolicy(policyForTarget), out);
-
-		String modifiedPolicy = out.toString().replaceAll("ppl:Policy", "xacml:Policy");
-
-		StringReader in = new StringReader(modifiedPolicy);
-
-		result = PolicyConverter.unmarshal(in).getTarget();
-
-		return result;
-	}
 
 	/**
 	 * Transforms PolicySet element from PPL schema to conform with pure XACML

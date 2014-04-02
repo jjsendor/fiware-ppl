@@ -29,6 +29,15 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.pdp.request;
 
+import org.herasaf.xacml.core.context.impl.AttributeType;
+import org.herasaf.xacml.core.context.impl.AttributeValueType;
+import org.herasaf.xacml.core.context.impl.EnvironmentType;
+import org.herasaf.xacml.core.context.impl.ObjectFactory;
+import org.herasaf.xacml.core.context.impl.RequestType;
+import org.herasaf.xacml.core.context.impl.ResourceType;
+import org.herasaf.xacml.core.context.impl.SubjectType;
+import org.herasaf.xacml.core.dataTypeAttribute.impl.StringDataTypeAttribute;
+
 /**
  * Authorization request used by decision point during the policy evaluation.
  *
@@ -36,6 +45,8 @@ package com.sap.a4cloud.apple.pdp.request;
  *
  */
 public class PdpRequest {
+
+	private static final ObjectFactory ofHerasContext = new ObjectFactory();
 
 	private String subject;
 	private String resource;
@@ -81,6 +92,56 @@ public class PdpRequest {
 	 */
 	public String getPurpose() {
 		return purpose;
+	}
+
+	/**
+	 * Converts the request to XACML request that can be used for access
+	 * control.
+	 *
+	 * @return a request that can be used for access control evaluation
+	 */
+	public RequestType toXacmlRequest() {
+		//create the request query
+		RequestType request = ofHerasContext.createRequestType();
+
+		//create the subject attribute
+		SubjectType subjectType = ofHerasContext.createSubjectType();
+		AttributeType subjectAttribute = createAttribute(
+				"http://www.a4cloud.eu/appl/subject", subject);
+		subjectType.getAttributes().add(subjectAttribute);
+		request.getSubjects().add(subjectType);
+
+		// create the resource attribute
+		ResourceType resourceType = ofHerasContext.createResourceType();
+		AttributeType resourceAttribute = createAttribute(
+				"http://www.a4cloud.eu/appl/resource", resource);
+		resourceType.getAttributes().add(resourceAttribute);
+		request.getResources().add(resourceType);
+
+		// create empty environment
+		request.setEnvironment(new EnvironmentType());
+
+		return request;
+	}
+
+	/**
+	 * Helper method that creates attribute element with a given id and value.
+	 *
+	 * @param attributeId		the attribute id
+	 * @param attributeValue	the attribute value
+	 * @return	the attribute element containing given id and value
+	 */
+	private static AttributeType createAttribute(String attributeId,
+			String attributeValue) {
+		AttributeType attribute = ofHerasContext.createAttributeType();
+		AttributeValueType value = ofHerasContext.createAttributeValueType();
+
+		attribute.setAttributeId(attributeId);
+		attribute.setDataType(new StringDataTypeAttribute());
+
+		value.getContent().add(attributeValue);
+		attribute.getAttributeValues().add(value);
+		return attribute;
 	}
 
 }
