@@ -9,4 +9,11 @@
   <artifactId>pdp</artifactId>
   <name>Policy Decision Point</name>
   <description>Evaluates policies to issue authorization decision</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>ppl-schema</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>
