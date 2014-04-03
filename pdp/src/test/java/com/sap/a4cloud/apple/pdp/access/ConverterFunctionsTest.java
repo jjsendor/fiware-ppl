@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.utils;
+package com.sap.a4cloud.apple.pdp.access;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -35,7 +35,6 @@ import java.io.FileNotFoundException;
 
 import javax.xml.bind.JAXBException;
 
-import org.herasaf.xacml.core.policy.impl.TargetType;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,8 +52,9 @@ import eu.primelife.ppl.policy.impl.PolicyType;
  * @date Nov 17, 2010
  * 
  */
-public class HerasConverterTest {
+public class ConverterFunctionsTest {
 
+	private static final String POLICY_ROOT = "/policies/converter/";
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		// HERAS initialization
@@ -75,14 +75,14 @@ public class HerasConverterTest {
 			WritingException, org.herasaf.xacml.core.SyntaxException, JAXBException {
 		UnmarshallImpl unmarshaller = new UnmarshallImpl(PolicyType.class.getPackage());
 		PolicyType addressPref = (PolicyType) unmarshaller.unmarshal(getClass()
-				.getResourceAsStream("/herasConverterTest/AddressPreferences.xml"));
+				.getResourceAsStream(POLICY_ROOT + "AddressPreferences.xml"));
 		assertNotNull(addressPref);
 		org.herasaf.xacml.core.policy.impl.PolicyType herasAddressPref = ConverterFunctions
 				.convertToHerasPolicy(addressPref);
 		assertNotNull(herasAddressPref);
 
 		PolicyType emailPref = (PolicyType) unmarshaller.unmarshal(getClass().getResourceAsStream(
-				"/herasConverterTest/EmailPreferences.xml"));
+				POLICY_ROOT + "EmailPreferences.xml"));
 		assertNotNull(emailPref);
 		org.herasaf.xacml.core.policy.impl.PolicyType herasEmailPref = ConverterFunctions
 				.convertToHerasPolicy(emailPref);
@@ -102,37 +102,11 @@ public class HerasConverterTest {
 			WritingException, org.herasaf.xacml.core.SyntaxException, JAXBException {
 		UnmarshallImpl unmarshaller = new UnmarshallImpl(PolicySetType.class.getPackage());
 		PolicySetType policySetPref = (PolicySetType) unmarshaller.unmarshal(getClass()
-				.getResourceAsStream("/herasConverterTest/PolicySetPreferences.xml"));
+				.getResourceAsStream(POLICY_ROOT + "PolicySetPreferences.xml"));
 		assertNotNull(policySetPref);
 		org.herasaf.xacml.core.policy.impl.PolicySetType herasPolicySetPref = ConverterFunctions
 				.convertToHerasPolicySet(policySetPref);
 		assertNotNull(herasPolicySetPref);
-	}
-	
-	/**
-	 * Test fromPPLTargetToHerasTarget
-	 * converting a policy to target
-	 * @throws SyntaxException
-	 * @throws FileNotFoundException
-	 * @throws WritingException
-	 * @throws org.herasaf.xacml.core.SyntaxException
-	 * @throws JAXBException
-	 */
-	@Test
-	public void testConvert() throws SyntaxException, FileNotFoundException,
-			WritingException, org.herasaf.xacml.core.SyntaxException, JAXBException {
-		UnmarshallImpl unmarshaller = new UnmarshallImpl(PolicyType.class.getPackage());
-		
-		SimplePDPFactory.useDefaultInitializers();
-		SimplePDPFactory.getSimplePDP();
-		
-		PolicyType policy = (PolicyType) unmarshaller.unmarshal(
-				getClass().getResourceAsStream("/herasConverterTest/Policy.xml"));
-		assertNotNull(policy);
-		assertNotNull(policy.getTarget());
-		TargetType targetHeras = ConverterFunctions.fromPPLTargetToHerasTarget(
-				policy.getTarget());
-		assertNotNull(targetHeras);
 	}
 
 }

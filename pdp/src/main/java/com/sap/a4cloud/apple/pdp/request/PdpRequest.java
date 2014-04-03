@@ -47,6 +47,8 @@ import org.herasaf.xacml.core.dataTypeAttribute.impl.StringDataTypeAttribute;
 public class PdpRequest {
 
 	private static final ObjectFactory ofHerasContext = new ObjectFactory();
+	private static final String SUBJECT_ATTR_ID = "subject:subject-id";
+	private static final String RESOURCE_ATTR_ID = "resource:resource-type";
 
 	private String subject;
 	private String resource;
@@ -107,14 +109,14 @@ public class PdpRequest {
 		//create the subject attribute
 		SubjectType subjectType = ofHerasContext.createSubjectType();
 		AttributeType subjectAttribute = createAttribute(
-				"http://www.a4cloud.eu/appl/subject", subject);
+				SUBJECT_ATTR_ID, subject);
 		subjectType.getAttributes().add(subjectAttribute);
 		request.getSubjects().add(subjectType);
 
 		// create the resource attribute
 		ResourceType resourceType = ofHerasContext.createResourceType();
 		AttributeType resourceAttribute = createAttribute(
-				"http://www.a4cloud.eu/appl/resource", resource);
+				RESOURCE_ATTR_ID, resource);
 		resourceType.getAttributes().add(resourceAttribute);
 		request.getResources().add(resourceType);
 
