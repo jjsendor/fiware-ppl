@@ -15,5 +15,10 @@
       <artifactId>ppl-engine-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>pdp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

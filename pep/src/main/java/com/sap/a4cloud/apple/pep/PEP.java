@@ -35,9 +35,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sap.a4cloud.apple.pdp.PDP;
+import com.sap.a4cloud.apple.pdp.request.PdpRequest;
 import com.sap.research.primelife.dao.PiiDao;
 
 import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.pii.impl.PIITypePolicySetOrPolicyItem;
+import eu.primelife.ppl.policy.impl.PolicySetType;
+import eu.primelife.ppl.policy.impl.PolicyType;
 
 /**
  * Policy Enforcement Point.
@@ -51,6 +56,7 @@ public class PEP {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PEP.class);
 
 	private PiiDao piiDao = new PiiDao();
+	private PDP pdp = new PDP();
 
 	/**
 	 * Retrieves list of PII with a given attribute name owned by a given user.
@@ -71,9 +77,27 @@ public class PEP {
 				piiDao.findAllByAttributeNameAndOwner(attributeName, owner);
 		List<PIIType> result = new ArrayList<PIIType>(piiList.size());
 
+		PdpRequest request = new PdpRequest(subject, purpose);
 		// filter the list according to the decision and add to the result list
-		for (PIIType piiType : piiList) {
-			// TODO call PDP to request the decision
+		for (PIIType pii : piiList) {
+			List<PIITypePolicySetOrPolicyItem> policies =
+					pii.getPolicySetOrPolicyItems();
+			// empty policy means no access right
+			if (!policies.isEmpty()) {
+				PIITypePolicySetOrPolicyItem policySetOrPolicy =
+						policies.get(0);
+				// extract policy set and policy
+				PolicySetType policySet = policySetOrPolicy.getItemPolicySet();
+				PolicyType policy = policySetOrPolicy.getItemPolicy();
+
+				// the policy set has precedence over the policy
+				if (policySet != null && pdp.decide(request, policySet)) {
+					result.add(pii);
+				}
+				else if (policy != null && pdp.decide(request, policy)) {
+					result.add(pii);
+				}
+			}
 		}
 
 		// TODO create and trigger event data used for purpose
