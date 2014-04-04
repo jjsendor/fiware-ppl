@@ -77,8 +77,7 @@ public class AccessControlTest {
 		String policySetPath = POLICY_ROOT + "PolicySet.xml";
 		PolicySetType policySet = (PolicySetType) unmarshaller.unmarshal(
 				getClass().getResourceAsStream(policySetPath));
-		PdpRequest request = new PdpRequest("MarcheAzur", "shopping-history",
-				null);
+		PdpRequest request = new PdpRequest("MarcheAzur", null);
 
 		AccessControl ac = new AccessControl();
 		DecisionType decision =
@@ -97,8 +96,7 @@ public class AccessControlTest {
 		String policyPath = POLICY_ROOT + "Policy.xml";
 		PolicyType policy = (PolicyType) unmarshaller.unmarshal(
 				getClass().getResourceAsStream(policyPath));
-		PdpRequest request = new PdpRequest("MarcheAzur", "shopping-history",
-				null);
+		PdpRequest request = new PdpRequest("MarcheAzur", null);
 
 		AccessControl ac = new AccessControl();
 		DecisionType decision =

@@ -29,14 +29,7 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.pdp.request;
 
-import org.herasaf.xacml.core.context.impl.AttributeType;
-import org.herasaf.xacml.core.context.impl.AttributeValueType;
-import org.herasaf.xacml.core.context.impl.EnvironmentType;
-import org.herasaf.xacml.core.context.impl.ObjectFactory;
 import org.herasaf.xacml.core.context.impl.RequestType;
-import org.herasaf.xacml.core.context.impl.ResourceType;
-import org.herasaf.xacml.core.context.impl.SubjectType;
-import org.herasaf.xacml.core.dataTypeAttribute.impl.StringDataTypeAttribute;
 
 /**
  * Authorization request used by decision point during the policy evaluation.
@@ -46,12 +39,9 @@ import org.herasaf.xacml.core.dataTypeAttribute.impl.StringDataTypeAttribute;
  */
 public class PdpRequest {
 
-	private static final ObjectFactory ofHerasContext = new ObjectFactory();
 	private static final String SUBJECT_ATTR_ID = "subject:subject-id";
-	private static final String RESOURCE_ATTR_ID = "resource:resource-type";
 
 	private String subject;
-	private String resource;
 	private String purpose;
 
 	/**
@@ -62,10 +52,9 @@ public class PdpRequest {
 	 * @param purpose	the purpose of requesting authorization to access
 	 * 					the resource
 	 */
-	public PdpRequest(String subject, String resource, String purpose) {
+	public PdpRequest(String subject, String purpose) {
 		super();
 		this.subject = subject;
-		this.resource = resource;
 		this.purpose = purpose;
 	}
 
@@ -76,15 +65,6 @@ public class PdpRequest {
 	 */
 	public String getSubject() {
 		return subject;
-	}
-	
-	/**
-	 * Returns the resource to which access is requested.
-	 *
-	 * @return	the request resource
-	 */
-	public String getResource() {
-		return resource;
 	}
 
 	/**
@@ -103,47 +83,10 @@ public class PdpRequest {
 	 * @return a request that can be used for access control evaluation
 	 */
 	public RequestType toXacmlRequest() {
-		//create the request query
-		RequestType request = ofHerasContext.createRequestType();
-
-		//create the subject attribute
-		SubjectType subjectType = ofHerasContext.createSubjectType();
-		AttributeType subjectAttribute = createAttribute(
-				SUBJECT_ATTR_ID, subject);
-		subjectType.getAttributes().add(subjectAttribute);
-		request.getSubjects().add(subjectType);
-
-		// create the resource attribute
-		ResourceType resourceType = ofHerasContext.createResourceType();
-		AttributeType resourceAttribute = createAttribute(
-				RESOURCE_ATTR_ID, resource);
-		resourceType.getAttributes().add(resourceAttribute);
-		request.getResources().add(resourceType);
-
-		// create empty environment
-		request.setEnvironment(new EnvironmentType());
-
-		return request;
-	}
-
-	/**
-	 * Helper method that creates attribute element with a given id and value.
-	 *
-	 * @param attributeId		the attribute id
-	 * @param attributeValue	the attribute value
-	 * @return	the attribute element containing given id and value
-	 */
-	private static AttributeType createAttribute(String attributeId,
-			String attributeValue) {
-		AttributeType attribute = ofHerasContext.createAttributeType();
-		AttributeValueType value = ofHerasContext.createAttributeValueType();
-
-		attribute.setAttributeId(attributeId);
-		attribute.setDataType(new StringDataTypeAttribute());
-
-		value.getContent().add(attributeValue);
-		attribute.getAttributeValues().add(value);
-		return attribute;
+		// create the request query using subject
+		return new XacmlRequestGenerator()
+			.addSubject(SUBJECT_ATTR_ID, subject)
+			.generate();
 	}
 
 }
