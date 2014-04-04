@@ -27,55 +27,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.a4cloud.apple.pdp;
-
-import org.herasaf.xacml.core.context.impl.DecisionType;
-
-import com.sap.a4cloud.apple.pdp.access.AccessControl;
-import com.sap.a4cloud.apple.pdp.request.PdpRequest;
-
-import eu.primelife.ppl.policy.impl.PolicySetType;
-import eu.primelife.ppl.policy.impl.PolicyType;
+package com.sap.a4cloud.apple.pdp.access;
 
 /**
- * Policy Decision Point.
- * Evaluates policy and issues authorization decision.
+ * Exception indicating errors during the policy conversion.
  *
  * @author Jakub Sendor
  *
  */
-public class PDP {
+public class ConverterException extends Exception {
 
-	/**
-	 * Evaluates authorization request against a given policy.
-	 *
-	 * @param request	the authorization request
-	 * @param policy	the policy against which the request is evaluated
-	 *
-	 * @return	<code>true</code> if the authorization is granted,
-	 * 			<code>false</code> if it is denied
-	 */
-	public boolean decide(PdpRequest request, PolicyType policy) {
-		AccessControl ac = new AccessControl();
-		DecisionType decision = ac.evaluate(request.toXacmlRequest(), policy);
-		// TODO add usage control (check purpose)
-		return DecisionType.PERMIT.equals(decision);
+	private static final long serialVersionUID = -5789847972592647513L;
+
+	public ConverterException() {
+		super();
 	}
 
-	/**
-	 * Evaluates authorization request against a given policy set.
-	 *
-	 * @param request	the authorization request
-	 * @param policySet	the policy against which the request is evaluated
-	 *
-	 * @return	<code>true</code> if the authorization is granted,
-	 * 			<code>false</code> if it is denied
-	 */
-	public boolean decide(PdpRequest request, PolicySetType policySet) {
-		AccessControl ac = new AccessControl();
-		DecisionType decision = ac.evaluate(request.toXacmlRequest(), policySet);
-		// TODO add usage control (check purpose)
-		return DecisionType.PERMIT.equals(decision);
+	public ConverterException(String message) {
+		super(message);
+	}
+
+	public ConverterException(Throwable cause) {
+		super(cause);
+	}
+
+	public ConverterException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

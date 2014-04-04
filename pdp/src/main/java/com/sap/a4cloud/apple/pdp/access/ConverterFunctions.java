@@ -33,9 +33,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import org.herasaf.xacml.core.policy.PolicyConverter;
+import org.herasaf.xacml.core.policy.impl.PolicySetType;
+import org.herasaf.xacml.core.policy.impl.PolicyType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sap.research.primelife.exceptions.SyntaxException;
 import com.sap.research.primelife.exceptions.WritingException;
@@ -45,8 +50,6 @@ import com.sap.research.primelife.marshalling.UnmarshallFactory;
 import com.sap.research.primelife.marshalling.UnmarshallImpl;
 
 import eu.primelife.ppl.policy.impl.ObjectFactory;
-import eu.primelife.ppl.policy.impl.PolicySetType;
-import eu.primelife.ppl.policy.impl.PolicyType;
 import eu.primelife.ppl.policy.impl.RuleType;
 import eu.primelife.ppl.policy.xacml.impl.PolicySetTypePolicySetOrPolicyOrPolicySetIdReferenceItem;
 import eu.primelife.ppl.policy.xacml.impl.PolicyTypeCombinerParametersOrRuleCombinerParametersOrVariableDefinitionItem;
@@ -61,134 +64,275 @@ import eu.primelife.ppl.policy.xacml.impl.PolicyTypeCombinerParametersOrRuleComb
  */
 public class ConverterFunctions {
 
-	/**
-	 * Transforms PolicySet element from PPL schema to conform with pure XACML
-	 * schema (e.g. removes Data Handling Policy and Data Handling Preferences).
-	 *
-	 * @param pplPolicySet	PolicySet element from PPL schema
-	 * @return	PolicySet element from HERAS XACML
-	 * @throws JAXBException
-	 */
-	public static org.herasaf.xacml.core.policy.impl.PolicySetType convertToHerasPolicySet(
-			PolicySetType pplPolicySet) throws WritingException,
-			org.herasaf.xacml.core.SyntaxException, SyntaxException,
-			JAXBException {
-		ObjectFactory objectFactory = new ObjectFactory();
-		MarshallImpl marshaller = MarshallFactory.createMarshallImpl(PolicySetType.class.getPackage(), false); 
-//			new MarshallImpl(PolicySetType.class.getPackage(), false);
-		UnmarshallImpl unmarshaller = UnmarshallFactory.createUnmarshallImpl(PolicySetType.class.getPackage());
-//			new UnmarshallImpl(PolicySetType.class.getPackage());
-		StringWriter writer = new StringWriter();
+	private static final Logger LOGGER =
+			LoggerFactory.getLogger(ConverterFunctions.class);
+	private static ObjectFactory objectFactory = new ObjectFactory();
+	private static MarshallImpl marshaller;
+	private static UnmarshallImpl unmarshaller;
 
-		// PPL PolicySet is marshalled and unmarshalled, just to create ideal copy
-		// (because transformation will be removing PPL-specific parts of PolicySet,
-		// and that changes shouldn't affect original Policy)
-		marshaller.marshal(objectFactory.createPolicySet(pplPolicySet), writer);
-		Reader reader = new StringReader(writer.toString());
-		pplPolicySet = (PolicySetType) unmarshaller.unmarshal(reader);
+	static {
+		try {
+			marshaller = MarshallFactory.createMarshallImpl(
+					eu.primelife.ppl.policy.impl.PolicySetType.class
+							.getPackage(), false);
+		} catch (JAXBException e) {
+			LOGGER.error("Exception while creating marshaller for policy converter", e);
+		}
 
-		// remove PPL-specific elements
-		convertToHeras(pplPolicySet);
-
-		// marshal to string again
-		writer = new StringWriter();
-		marshaller.marshal(objectFactory.createPolicySet(pplPolicySet), writer);
-
-		// change namespace perfix of PPL elements
-		String modifiedPolicySet = writer.toString()
-			.replaceAll("ppl:PolicySet", "xacml:PolicySet")
-			.replaceAll("ppl:Policy", "xacml:Policy")
-			.replaceAll("ppl:Rule", "xacml:Rule");
-		reader = new StringReader(modifiedPolicySet);
-
-		return (org.herasaf.xacml.core.policy.impl.PolicySetType)
-				PolicyConverter.unmarshal(reader);
-	}
-
-	/**
-	 * Recursively converts all nested PolicySet or Policy elements to conform
-	 * with HERAS XACML structure (e.g. removes Data Handling Preferences and
-	 * Data Handling Policies).
-	 *
-	 * @param pplPolicySet	PolicySet element converted to HERAS XACML
-	 */
-	private static void convertToHeras(
-			eu.primelife.ppl.policy.impl.PolicySetType pplPolicySet) {
-		pplPolicySet.setDataHandlingPolicy(null);
-		pplPolicySet.setDataHandlingPreferences(null);
-		pplPolicySet.setStickyPolicy(null);
-
-		for (PolicySetTypePolicySetOrPolicyOrPolicySetIdReferenceItem item :
-				pplPolicySet.getPolicySetOrPolicyOrPolicySetIdReferenceItems()) {
-			PolicyType policy = (PolicyType) item.getItemPolicy();
-
-			if (policy != null)
-				convertToHeras(policy);
-
-			eu.primelife.ppl.policy.impl.PolicySetType policySet =
-				(eu.primelife.ppl.policy.impl.PolicySetType) item.getItemPolicySet();
-
-			if (policySet != null)
-				convertToHeras(policySet);
+		try {
+			unmarshaller = UnmarshallFactory.createUnmarshallImpl(
+					eu.primelife.ppl.policy.impl.PolicySetType.class
+							.getPackage());
+		} catch (JAXBException e) {
+			LOGGER.error("Exception while creating unmarshaller for policy converter", e);
 		}
 	}
 
 	/**
-	 * Transforms Policy element from PPL schema to conform with pure XACML
+	 * Transforms policy set element from PPL schema to conform with pure XACML
 	 * schema (e.g. removes Data Handling Policy and Data Handling Preferences).
 	 *
-	 * @param pplPolicy	Policy element from PPL schema
-	 * @return	Policy element from HERAS XACML
-	 * @throws JAXBException
+	 * @param pplPolicySet
+	 *            the policy set element conforming with PPL schema
+	 * @return the policy set element conforming with the HERAS XACML schema
+	 * @throws ConverterException
+	 *             if there was an error while converting the policy set
 	 */
-	public static org.herasaf.xacml.core.policy.impl.PolicyType convertToHerasPolicy(PolicyType pplPolicy) throws WritingException,
-																						org.herasaf.xacml.core.SyntaxException, SyntaxException,
-																						JAXBException {
-		ObjectFactory objectFactory = new ObjectFactory();
-		MarshallImpl marshaller = MarshallFactory.createMarshallImpl(PolicyType.class.getPackage(), false);
-//			new MarshallImpl(PolicyType.class.getPackage(), false);
-		UnmarshallImpl unmarshaller = UnmarshallFactory.createUnmarshallImpl(PolicyType.class.getPackage());
-//			new UnmarshallImpl(PolicyType.class.getPackage());
-		StringWriter writer = new StringWriter();
-
-		// PPL Policy is marshalled and unmarshalled, just to create ideal copy
-		// (because transformation will be removing PPL-specific parts of Policy,
+	public static PolicySetType convertToHerasPolicySet(
+			eu.primelife.ppl.policy.impl.PolicySetType pplPolicySet)
+			throws ConverterException {
+		// clone PPL policy set
+		// (because transformation will be removing PPL-specific parts of PolicySet,
 		// and that changes shouldn't affect original Policy)
-		marshaller.marshal(objectFactory.createPolicy(pplPolicy), writer);
-		Reader reader = new StringReader(writer.toString());
-		pplPolicy = (PolicyType) unmarshaller.unmarshal(reader);
+		eu.primelife.ppl.policy.impl.PolicySetType clonedPplPolicySet =
+				clonePplPolicySet(pplPolicySet);
 
 		// remove PPL-specific elements
-		convertToHeras(pplPolicy);
+		removePplSpecificElements(clonedPplPolicySet);
 
 		// marshal to string again
-		writer = new StringWriter();
-		marshaller.marshal(objectFactory.createPolicy(pplPolicy), writer);
+		StringWriter writer = marshalPplPolicySet(clonedPplPolicySet);
 
-		// change namespace perfix of PPL elements
-		String modifiedPolicy = writer.toString()
-			.replaceAll("ppl:Policy", "xacml:Policy")
-			.replaceAll("ppl:Rule", "xacml:Rule");
-		reader = new StringReader(modifiedPolicy);
+		// change namespace prefix of PPL elements
+		String modifiedPolicySet = swapPolicySetPrefix(writer.toString());
+		Reader reader = new StringReader(modifiedPolicySet);
 
-		return (org.herasaf.xacml.core.policy.impl.PolicyType) PolicyConverter
-				.unmarshal(reader);
+		PolicySetType herasPolicySet = unmarshalHerasPolicySet(reader);
+		return herasPolicySet;
 	}
 
 	/**
-	 * Converts Policy and nested Rule elements to conform
-	 * with HERAS XACML structure (e.g. removes Data Handling Preferences and
-	 * Data Handling Policies).
+	 * PPL policy set is marshalled and unmarshalled to create ideal copy.
 	 *
-	 * @param pplPolicy	Policy element converted to HERAS XACML
+	 * @param pplPolicySet
+	 *            the PPL policy set to be cloned
+	 * @return ideal copy of the policy set
+	 * @throws ConverterException
+	 *             thrown if there is an issue marshalling or unmarshalling the
+	 *             policy set
 	 */
-	private static void convertToHeras(PolicyType pplPolicy) {
-		pplPolicy.setDataHandlingPolicy(null);
-		pplPolicy.setDataHandlingPreferences(null);
-		pplPolicy.setStickyPolicy(null);
+	private static eu.primelife.ppl.policy.impl.PolicySetType clonePplPolicySet(
+			eu.primelife.ppl.policy.impl.PolicySetType pplPolicySet)
+			throws ConverterException {
+		StringWriter writer = marshalPplPolicySet(pplPolicySet);
+		Reader reader = new StringReader(writer.toString());
+		eu.primelife.ppl.policy.impl.PolicySetType clonedPplPolicySet =
+				unmarshalPplPolicySet(reader);
+		return clonedPplPolicySet;
+	}
+
+	private static eu.primelife.ppl.policy.impl.PolicySetType unmarshalPplPolicySet(
+			Reader reader) throws ConverterException {
+		eu.primelife.ppl.policy.impl.PolicySetType policySet;
+
+		try {
+			policySet = (eu.primelife.ppl.policy.impl.PolicySetType)
+					unmarshaller.unmarshal(reader);
+		} catch (SyntaxException e) {
+			LOGGER.error("Exception while unmarshalling the policy set", e);
+			throw new ConverterException("Unable to unmarshal the policy set", e);
+		}
+
+		return policySet;
+	}
+
+	private static StringWriter marshalPplPolicySet(
+			eu.primelife.ppl.policy.impl.PolicySetType pplPolicySet)
+			throws ConverterException {
+		StringWriter writer = new StringWriter();
+
+		try {
+			JAXBElement<eu.primelife.ppl.policy.impl.PolicySetType> jaxbPolicySet =
+					objectFactory.createPolicySet(pplPolicySet);
+			marshaller.marshal(jaxbPolicySet, writer);
+		} catch (WritingException e) {
+			LOGGER.error("Exception while marshalling the policy set", e);
+			throw new ConverterException("Unable to marshall the policy set", e);
+		}
+
+		return writer;
+	}
+
+	private static PolicySetType unmarshalHerasPolicySet(Reader reader)
+			throws ConverterException {
+		PolicySetType herasPolicySetType = null;
+
+		try {
+			herasPolicySetType = (PolicySetType) PolicyConverter
+					.unmarshal(reader);
+		} catch (org.herasaf.xacml.core.SyntaxException e) {
+			LOGGER.error("Exception while umarshalling the HERAS policy set", e);
+			throw new ConverterException("Unable to umarshal the HERAS policy set", e);
+		}
+
+		return herasPolicySetType;
+	}
+
+	/**
+	 * Recursively removes all PPL-specific elements (Data Handling Preferences,
+	 * Data Handling Policy or Sticky Policy elements) from a given policy set
+	 * and all nested policy sets and policy elements.
+	 *
+	 * @param policySet	the policy set from which all PPL-specific elements
+	 * 					will be removed
+	 */
+	private static void removePplSpecificElements(eu.primelife.ppl.policy.impl.PolicySetType policySet) {
+		policySet.setDataHandlingPolicy(null);
+		policySet.setDataHandlingPreferences(null);
+		policySet.setStickyPolicy(null);
+
+		for (PolicySetTypePolicySetOrPolicyOrPolicySetIdReferenceItem item :
+				policySet.getPolicySetOrPolicyOrPolicySetIdReferenceItems()) {
+			eu.primelife.ppl.policy.impl.PolicyType policy =
+					(eu.primelife.ppl.policy.impl.PolicyType) item.getItemPolicy();
+
+			if (policy != null) {
+				removePplSpecificElements(policy);
+			}
+
+			eu.primelife.ppl.policy.impl.PolicySetType nestedPolicySet =
+				(eu.primelife.ppl.policy.impl.PolicySetType) item.getItemPolicySet();
+
+			if (nestedPolicySet != null) {
+				removePplSpecificElements(nestedPolicySet);
+			}
+		}
+	}
+
+	/**
+	 * Transforms policy element from PPL schema to conform with pure XACML
+	 * schema (e.g. removes Data Handling Policy and Data Handling Preferences).
+	 *
+	 * @param pplPolicy
+	 *            the policy element conforming with the PPL schema
+	 * @return the policy element conforming with the HERAS XACML schema
+	 * @throws ConverterException
+	 *             if there was an error while converting the policy
+	 */
+	public static PolicyType convertToHerasPolicy(
+			eu.primelife.ppl.policy.impl.PolicyType pplPolicy)
+			throws ConverterException {
+		// clone PPL policy
+		// (because transformation will be removing PPL-specific parts of Policy,
+		// and that changes shouldn't affect original Policy)
+		eu.primelife.ppl.policy.impl.PolicyType clonedPplPolicy =
+				clonePplPolicy(pplPolicy);
+
+		// remove PPL-specific elements
+		removePplSpecificElements(clonedPplPolicy);
+
+		// marshal to string again
+		StringWriter writer = marshalPplPolicy(clonedPplPolicy);
+
+		// change namespace prefix of PPL elements
+		String modifiedPolicy = swapPolicyPrefix(writer.toString());
+		Reader reader = new StringReader(modifiedPolicy);
+
+		PolicyType herasPolicy = unmarshalHerasPolicy(reader);
+		return herasPolicy;
+	}
+
+	/**
+	 * PPL policy is marshalled and unmarshalled to create ideal copy.
+	 *
+	 * @param pplPolicy
+	 *            the PPL policy to be cloned
+	 * @return ideal copy of the policy
+	 * @throws ConverterException
+	 *             thrown if there is an issue marshalling or unmarshalling the
+	 *             policy
+	 */
+	private static eu.primelife.ppl.policy.impl.PolicyType clonePplPolicy(
+			eu.primelife.ppl.policy.impl.PolicyType pplPolicy)
+			throws ConverterException {
+		StringWriter writer = marshalPplPolicy(pplPolicy);
+		Reader reader = new StringReader(writer.toString());
+		eu.primelife.ppl.policy.impl.PolicyType clonedPplPolicy =
+				unmarshalPplPolicy(reader);
+		return clonedPplPolicy;
+	}
+
+	private static eu.primelife.ppl.policy.impl.PolicyType unmarshalPplPolicy(
+			Reader reader) throws ConverterException {
+		eu.primelife.ppl.policy.impl.PolicyType policy = null;
+
+		try {
+			policy = (eu.primelife.ppl.policy.impl.PolicyType)
+					unmarshaller.unmarshal(reader);
+		} catch (SyntaxException e) {
+			LOGGER.error("Excpetion while unmarshalling the policy", e);
+			throw new ConverterException("Unable to unmarshal the policy", e);
+		}
+
+		return policy;
+	}
+
+	private static StringWriter marshalPplPolicy(
+			eu.primelife.ppl.policy.impl.PolicyType pplPolicy)
+			throws ConverterException {
+		StringWriter writer = new StringWriter();
+
+		try {
+			JAXBElement<eu.primelife.ppl.policy.impl.PolicyType> jaxbPolicy =
+					objectFactory.createPolicy(pplPolicy);
+			marshaller.marshal(jaxbPolicy, writer);
+		} catch (WritingException e) {
+			LOGGER.error("Exception while marshalling the policy", e);
+			throw new ConverterException("Unable to marshall the policy", e);
+		}
+
+		return writer;
+	}
+
+	private static PolicyType unmarshalHerasPolicy(Reader reader)
+			throws ConverterException {
+		PolicyType herasPolicy;
+
+		try {
+			herasPolicy = (PolicyType) PolicyConverter.unmarshal(reader);
+		} catch (org.herasaf.xacml.core.SyntaxException e) {
+			LOGGER.error("Exception while umarshalling the cloned policy", e);
+			throw new ConverterException("Unable to umarshal the cloned policy", e);
+		}
+
+		return herasPolicy;
+	}
+
+	/**
+	 * Removes all PPL-specific elements (Data Handling Preferences,
+	 * Data Handling Policy or Sticky Policy elements) from a given policy
+	 * and rules that this policy contains.
+	 *
+	 * @param policy	the policy from which PPL-specific elements will be
+	 * 					removed
+	 */
+	private static void removePplSpecificElements(eu.primelife.ppl.policy.impl.PolicyType policy) {
+		policy.setDataHandlingPolicy(null);
+		policy.setDataHandlingPreferences(null);
+		policy.setStickyPolicy(null);
 
 		for (PolicyTypeCombinerParametersOrRuleCombinerParametersOrVariableDefinitionItem item :
-				pplPolicy.getCombinerParametersOrRuleCombinerParametersOrVariableDefinitionItems()) {
+				policy.getCombinerParametersOrRuleCombinerParametersOrVariableDefinitionItems()) {
 			RuleType rule = (RuleType) item.getItemRule();
 
 			if (rule != null) {
@@ -199,30 +343,16 @@ public class ConverterFunctions {
 		}
 	}
 
-	/**
-	 * Transform a eu.primelife.ppl.policy.xacml.impl.PolicyType into org.herasaf.xacml.core.policy.impl.PolicyType
-	 * @param eu.primelife.ppl.policy.xacml.impl.PolicyType, a XACML Policy
-	 * @return
-	 * @throws WritingException 
-	 * @throws SyntaxException 
-	 * @throws JAXBException 
-	 * @throws org.herasaf.xacml.core.SyntaxException 
-	 */
-	public static org.herasaf.xacml.core.policy.impl.PolicyType convertToHerasPolicy(eu.primelife.ppl.policy.xacml.impl.PolicyType policy) throws WritingException, SyntaxException, JAXBException, org.herasaf.xacml.core.SyntaxException {
-		
-		eu.primelife.ppl.policy.xacml.impl.ObjectFactory objectFactory = new eu.primelife.ppl.policy.xacml.impl.ObjectFactory();
-		MarshallImpl marshaller = MarshallFactory.createMarshallImpl(eu.primelife.ppl.policy.xacml.impl.PolicyType.class.getPackage(), false);
-		StringWriter writer = new StringWriter();
-
-		// The transformation is trivial just marshal the policy and then unmarshal into the herasaf beans
-		marshaller.marshal(objectFactory.createPolicy(policy), writer);
-		String str = writer.toString();
-		Reader reader = new StringReader(str);
-
-		org.herasaf.xacml.core.policy.impl.PolicyType hpolicy = (org.herasaf.xacml.core.policy.impl.PolicyType) PolicyConverter.unmarshal(reader);
-		
-		return hpolicy;
+	private static String swapPolicySetPrefix(String s) {
+		return swapPolicyPrefix(s.replaceAll("ppl:PolicySet", "xacml:PolicySet"));
 	}
 
+	private static String swapPolicyPrefix(String s) {
+		return swapRulePrefix(s.replaceAll("ppl:Policy", "xacml:Policy"));
+	}
+
+	private static String swapRulePrefix(String s) {
+		return s.replaceAll("ppl:Rule", "xacml:Rule");
+	}
 
 }

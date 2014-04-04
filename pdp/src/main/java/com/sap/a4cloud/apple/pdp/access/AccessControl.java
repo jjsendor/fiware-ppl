@@ -29,9 +29,7 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.pdp.access;
 
-import javax.xml.bind.JAXBException;
 
-import org.herasaf.xacml.core.SyntaxException;
 import org.herasaf.xacml.core.api.PDP;
 import org.herasaf.xacml.core.api.PolicyRepository;
 import org.herasaf.xacml.core.context.RequestCtx;
@@ -40,8 +38,8 @@ import org.herasaf.xacml.core.context.impl.DecisionType;
 import org.herasaf.xacml.core.context.impl.RequestType;
 import org.herasaf.xacml.core.policy.Evaluatable;
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
-
-import com.sap.research.primelife.exceptions.WritingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.primelife.ppl.policy.impl.PolicySetType;
 import eu.primelife.ppl.policy.impl.PolicyType;
@@ -52,6 +50,9 @@ import eu.primelife.ppl.policy.impl.PolicyType;
  *
  */
 public class AccessControl {
+
+	private static final Logger LOGGER =
+			LoggerFactory.getLogger(AccessControl.class);
 
 	private PDP simplePDP;
 	private PolicyRepository repo;
@@ -71,18 +72,18 @@ public class AccessControl {
 	 * @param policySet	the policy set against which the request is evaluated
 	 * @param request	the XACML request
 	 * @return the decision (PERMIT, DENY, INDETERMINATE, NOT_APPLICABLE)
-	 * @throws WritingException
-	 * @throws SyntaxException
-	 * @throws com.sap.research.primelife.exceptions.SyntaxException
-	 * @throws JAXBException
 	 */
-	public DecisionType evaluate(RequestType request, PolicySetType policySet)
-			throws WritingException, SyntaxException,
-			com.sap.research.primelife.exceptions.SyntaxException,
-			JAXBException {
+	public DecisionType evaluate(RequestType request, PolicySetType policySet) {
+		Evaluatable evaluatable;
+
 		// convert to HERAS policy set
-		Evaluatable evaluatable =
-				ConverterFunctions.convertToHerasPolicySet(policySet);
+		try {
+			evaluatable = ConverterFunctions.convertToHerasPolicySet(policySet);
+		} catch (ConverterException e) {
+			LOGGER.error("Exception while converting to the HERAS policy set", e);
+			return DecisionType.INDETERMINATE;
+		}
+
 		return evaluate(request, evaluatable);
 	}
 
@@ -92,18 +93,18 @@ public class AccessControl {
 	 * @param policy	the policy against which the request is evaluated
 	 * @param request	the XACML request
 	 * @return the decision (PERMIT, DENY, INDETERMINATE, NOT_APPLICABLE)
-	 * @throws WritingException
-	 * @throws SyntaxException
-	 * @throws com.sap.research.primelife.exceptions.SyntaxException
-	 * @throws JAXBException
 	 */
-	public DecisionType evaluate(RequestType request, PolicyType policy)
-			throws WritingException, SyntaxException,
-			com.sap.research.primelife.exceptions.SyntaxException,
-			JAXBException {
+	public DecisionType evaluate(RequestType request, PolicyType policy) {
+		Evaluatable evaluatable;
+
 		// convert to HERAS policy
-		Evaluatable evaluatable =
-				ConverterFunctions.convertToHerasPolicy(policy);
+		try {
+			evaluatable = ConverterFunctions.convertToHerasPolicy(policy);
+		} catch (ConverterException e) {
+			LOGGER.error("Exception while converting to the HERAS policy", e);
+			return DecisionType.INDETERMINATE;
+		}
+
 		return evaluate(request, evaluatable);
 	}
 

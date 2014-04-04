@@ -31,8 +31,6 @@ package com.sap.a4cloud.apple.pdp.access;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.FileNotFoundException;
-
 import javax.xml.bind.JAXBException;
 
 import org.herasaf.xacml.core.simplePDP.SimplePDPFactory;
@@ -40,7 +38,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.research.primelife.exceptions.SyntaxException;
-import com.sap.research.primelife.exceptions.WritingException;
 import com.sap.research.primelife.marshalling.UnmarshallImpl;
 
 import eu.primelife.ppl.policy.impl.PolicySetType;
@@ -64,15 +61,13 @@ public class ConverterFunctionsTest {
 
 	/**
 	 * Test converting a policy for HERAS.
-	 * @throws SyntaxException
-	 * @throws FileNotFoundException
-	 * @throws WritingException
-	 * @throws org.herasaf.xacml.core.SyntaxException
 	 * @throws JAXBException
+	 * @throws SyntaxException
+	 * @throws ConverterException
 	 */
 	@Test
-	public void testConvertToHerasPolicy() throws SyntaxException, FileNotFoundException,
-			WritingException, org.herasaf.xacml.core.SyntaxException, JAXBException {
+	public void testConvertToHerasPolicy() throws JAXBException,
+			SyntaxException, ConverterException {
 		UnmarshallImpl unmarshaller = new UnmarshallImpl(PolicyType.class.getPackage());
 		PolicyType addressPref = (PolicyType) unmarshaller.unmarshal(getClass()
 				.getResourceAsStream(POLICY_ROOT + "AddressPreferences.xml"));
@@ -91,15 +86,13 @@ public class ConverterFunctionsTest {
 
 	/**
 	 * Test converting a policySet for HERAS.
-	 * @throws SyntaxException
-	 * @throws FileNotFoundException
-	 * @throws WritingException
-	 * @throws org.herasaf.xacml.core.SyntaxException
 	 * @throws JAXBException
+	 * @throws SyntaxException
+	 * @throws ConverterException
 	 */
 	@Test
-	public void testConvertToHerasPolicySet() throws SyntaxException, FileNotFoundException,
-			WritingException, org.herasaf.xacml.core.SyntaxException, JAXBException {
+	public void testConvertToHerasPolicySet() throws JAXBException,
+			SyntaxException, ConverterException {
 		UnmarshallImpl unmarshaller = new UnmarshallImpl(PolicySetType.class.getPackage());
 		PolicySetType policySetPref = (PolicySetType) unmarshaller.unmarshal(getClass()
 				.getResourceAsStream(POLICY_ROOT + "PolicySetPreferences.xml"));
