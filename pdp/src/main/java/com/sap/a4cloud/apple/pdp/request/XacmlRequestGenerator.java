@@ -115,17 +115,34 @@ public class XacmlRequestGenerator {
 	 * @return	the XACML request compatible with HERAS
 	 */
 	public RequestType generate() {
+		createSubjects();
+		createResources();
+		createAction();
+		createEnvironment();
+
+		return request;
+	}
+
+	private void createSubjects() {
 		// add subject attributes
 		for (String subjectAttributeId : subjects.keySet()) {
 			String subjectAttributeValue = subjects.get(subjectAttributeId);
 			addSubjectAttribute(subjectAttributeId, subjectAttributeValue);
 		}
+	}
 
+	private void createResources() {
 		// add resource attributes
 		for (String resourceAttributeId : resources.keySet()) {
 			String resourceAttributeValue = resources.get(resourceAttributeId);
 			addResourceAttribute(resourceAttributeId, resourceAttributeValue);
 		}
+	}
+
+	private void createAction() {
+		// create an empty action type for the request
+		ActionType actionType = ofHerasContext.createActionType();
+		request.setAction(actionType);
 
 		// add action attribute
 		// (due to the HERAS request taking only one action attribute only
@@ -134,6 +151,15 @@ public class XacmlRequestGenerator {
 			String actionAttributeValue = actions.get(actionAttributeId);
 			addActionAttribute(actionAttributeId, actionAttributeValue);
 		}
+	}
+
+	private void createEnvironment() {
+		// create an empty environment type for the request
+		// (otherwise NullPointerException was thrown were creating HERAS
+		// request context)
+		EnvironmentType environmentType =
+				ofHerasContext.createEnvironmentType();
+		request.setEnvironment(environmentType);
 
 		// add environment
 		// (only the last one - as for action) 
@@ -143,8 +169,6 @@ public class XacmlRequestGenerator {
 			addEnvironmentAttribute(environmentAttributeId,
 					environmentAttributeValue);
 		}
-
-		return request;
 	}
 
 	/**
@@ -155,9 +179,13 @@ public class XacmlRequestGenerator {
 	 */
 	private void addSubjectAttribute(String subjectAttributeId,
 			String subjectAttributeValue) {
-		SubjectType subjectType = ofHerasContext.createSubjectType();
+		// create the subject attribute element
 		AttributeType subjectAttribute = createAttribute(
 				subjectAttributeId, subjectAttributeValue);
+
+		// create a new subject type with the attribute element
+		// and add it to the request
+		SubjectType subjectType = ofHerasContext.createSubjectType();
 		subjectType.getAttributes().add(subjectAttribute);
 		request.getSubjects().add(subjectType);
 	}
@@ -170,9 +198,13 @@ public class XacmlRequestGenerator {
 	 */
 	private void addResourceAttribute(String resourceAttributeId,
 			String resourceAttributeValue) {
-		ResourceType resourceType = ofHerasContext.createResourceType();
+		// create the resource attribute element
 		AttributeType resourceAttribute = createAttribute(
 				resourceAttributeId, resourceAttributeValue);
+
+		// create a new resource type with the attribute element
+		// and add it to the request
+		ResourceType resourceType = ofHerasContext.createResourceType();
 		resourceType.getAttributes().add(resourceAttribute);
 		request.getResources().add(resourceType);
 	}
@@ -185,11 +217,13 @@ public class XacmlRequestGenerator {
 	 */
 	private void addActionAttribute(String actionAttributeId,
 			String actionAttributeValue) {
-		ActionType actionType = ofHerasContext.createActionType();
+		// create the action attribute element
 		AttributeType actionAttribute = createAttribute(
 				actionAttributeId, actionAttributeValue);
+
+		// add the action attribute to the action element
+		ActionType actionType = request.getAction();
 		actionType.getAttributes().add(actionAttribute);
-		request.setAction(actionType);
 	}
 
 	/**
@@ -200,11 +234,13 @@ public class XacmlRequestGenerator {
 	 */
 	private void addEnvironmentAttribute(String environmentAttributeId,
 			String environmentAttributeValue) {
-		EnvironmentType environmentType = ofHerasContext.createEnvironmentType();
+		// create the environment attribute element
 		AttributeType environmentAttribute = createAttribute(
 				environmentAttributeId, environmentAttributeValue);
+
+		// add the environment attribute to the environment element
+		EnvironmentType environmentType = request.getEnvironment();
 		environmentType.getAttributes().add(environmentAttribute);
-		request.setEnvironment(environmentType);
 	}
 
 	/**

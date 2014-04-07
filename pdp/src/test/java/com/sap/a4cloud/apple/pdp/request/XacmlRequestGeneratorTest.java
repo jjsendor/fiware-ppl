@@ -51,7 +51,7 @@ import org.junit.Test;
 public class XacmlRequestGeneratorTest {
 
 	/**
-	 * Tests adding the subject to the request.
+	 * Tests adding the subject attribute to the request.
 	 */
 	@Test
 	public void testAddSubject() {
@@ -72,12 +72,17 @@ public class XacmlRequestGeneratorTest {
 		AttributeType attr = attrs.get(0);
 		assertEquals(subjectAttributeId, attr.getAttributeId());
 
-		String value = extractAttributeValue(attr);
-		assertEquals(subjectAttributeValue, value);
+		String attributeValue = extractAttributeValue(attr);
+		assertEquals(subjectAttributeValue, attributeValue);
+
+		// assert all other elements are empty
+		assertEmptyResource(request);
+		assertEmptyAction(request);
+		assertEmptyEnvironment(request);
 	}
 
 	/**
-	 * Tests adding the resource to the request.
+	 * Tests adding the resource attribute to the request.
 	 */
 	@Test
 	public void testAddResource() {
@@ -98,12 +103,17 @@ public class XacmlRequestGeneratorTest {
 		AttributeType attr = attrs.get(0);
 		assertEquals(resourceAttributeId, attr.getAttributeId());
 
-		String value = extractAttributeValue(attr);
-		assertEquals(resourceAttributeValue, value);
+		String attributeValue = extractAttributeValue(attr);
+		assertEquals(resourceAttributeValue, attributeValue);
+
+		// assert all other elements are empty
+		assertEmptySubject(request);
+		assertEmptyAction(request);
+		assertEmptyEnvironment(request);
 	}
 
 	/**
-	 * Tests adding the action to the request.
+	 * Tests adding the action attribute to the request.
 	 */
 	@Test
 	public void testAddAction() {
@@ -123,12 +133,17 @@ public class XacmlRequestGeneratorTest {
 		AttributeType attr = attrs.get(0);
 		assertEquals(actionAttributeId, attr.getAttributeId());
 
-		String value = extractAttributeValue(attr);
-		assertEquals(actionAttributeValue, value);
+		String attributeValue = extractAttributeValue(attr);
+		assertEquals(actionAttributeValue, attributeValue);
+
+		// assert all other elements are empty
+		assertEmptySubject(request);
+		assertEmptyResource(request);
+		assertEmptyEnvironment(request);
 	}
 
 	/**
-	 * Tests adding the subject to the request.
+	 * Tests adding the environment attribute to the request.
 	 */
 	@Test
 	public void testAddEnvironment() {
@@ -148,8 +163,13 @@ public class XacmlRequestGeneratorTest {
 		AttributeType attr = attrs.get(0);
 		assertEquals(environmentAttributeId, attr.getAttributeId());
 
-		String value = extractAttributeValue(attr);
-		assertEquals(environmentAttributeValue, value);
+		String attributeValue = extractAttributeValue(attr);
+		assertEquals(environmentAttributeValue, attributeValue);
+
+		// assert all other elements are empty
+		assertEmptySubject(request);
+		assertEmptyResource(request);
+		assertEmptyAction(request);
 	}
 
 	private String extractAttributeValue(AttributeType attr) {
@@ -167,4 +187,43 @@ public class XacmlRequestGeneratorTest {
 
 		return (String) object;
 	}
+
+	/**
+	 * Tests that there are no subject elements in the given request.
+	 * @param request
+	 */
+	private void assertEmptySubject(RequestType request) {
+		List<SubjectType> subjects = request.getSubjects();
+		assertTrue(subjects.isEmpty());
+	}
+
+	/**
+	 * Tests that there are no resource elements in the given request.
+	 * @param request
+	 */
+	private void assertEmptyResource(RequestType request) {
+		List<ResourceType> resources = request.getResources();
+		assertTrue(resources.isEmpty());
+	}
+
+	/**
+	 * Tests that there are no action attributes elements in the given request.
+	 * @param request
+	 */
+	private void assertEmptyAction(RequestType request) {
+		List<AttributeType> actionAttrs = request.getAction().getAttributes();
+		assertTrue(actionAttrs.isEmpty());
+	}
+
+	/**
+	 * Test that there are no environment attributes elements in the given
+	 * request.
+	 * @param request
+	 */
+	private void assertEmptyEnvironment(RequestType request) {
+		List<AttributeType> environment =
+				request.getEnvironment().getAttributes();
+		assertTrue(environment.isEmpty());
+	}
+
 }
