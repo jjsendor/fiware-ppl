@@ -40,8 +40,10 @@ import org.herasaf.xacml.core.context.impl.RequestType;
 public class PdpRequest {
 
 	private static final String SUBJECT_ATTR_ID = "subject:subject-id";
+	private static final String RESOURCE_ATTR_ID = "resource:resource-type";
 
 	private String subject;
+	private String resource;
 	private String purpose;
 
 	/**
@@ -52,9 +54,10 @@ public class PdpRequest {
 	 * @param purpose	the purpose of requesting authorization to access
 	 * 					the resource
 	 */
-	public PdpRequest(String subject, String purpose) {
+	public PdpRequest(String subject, String resource, String purpose) {
 		super();
 		this.subject = subject;
+		this.resource = resource;
 		this.purpose = purpose;
 	}
 
@@ -68,7 +71,16 @@ public class PdpRequest {
 	}
 
 	/**
-	 * Returns the purpose for which requested resource is accessed.
+	 * Returns the resource which is requested.
+	 *
+	 * @return	the requested resource
+	 */
+	public String getResource() {
+		return resource;
+	}
+
+	/**
+	 * Returns the purpose for which requested resource is requested.
 	 *
 	 * @return the request purpose
 	 */
@@ -86,6 +98,7 @@ public class PdpRequest {
 		// create the request query using subject
 		return new XacmlRequestGenerator()
 			.addSubject(SUBJECT_ATTR_ID, subject)
+			.addResource(RESOURCE_ATTR_ID, resource)
 			.generate();
 	}
 
