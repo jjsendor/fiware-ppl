@@ -73,35 +73,70 @@ public class PEP {
 			String attributeName, String owner) {
 		LOGGER.info("Requesting PII with attribute name {} owned by {}",
 				attributeName, owner);
-		List<PIIType> piiList =
-				piiDao.findAllByAttributeNameAndOwner(attributeName, owner);
+		List<PIIType> piiList = retrievePiiList(attributeName, owner);
 		List<PIIType> result = new ArrayList<PIIType>(piiList.size());
 
-		PdpRequest request = new PdpRequest(subject, purpose);
+		PdpRequest request = new PdpRequest(subject, attributeName, purpose);
 		// filter the list according to the decision and add to the result list
 		for (PIIType pii : piiList) {
 			List<PIITypePolicySetOrPolicyItem> policies =
 					pii.getPolicySetOrPolicyItems();
-			// empty policy means no access right
-			if (!policies.isEmpty()) {
-				PIITypePolicySetOrPolicyItem policySetOrPolicy =
-						policies.get(0);
-				// extract policy set and policy
-				PolicySetType policySet = policySetOrPolicy.getItemPolicySet();
-				PolicyType policy = policySetOrPolicy.getItemPolicy();
+			boolean authorized = isAuthorized(request, policies);
 
-				// the policy set has precedence over the policy
-				if (policySet != null && pdp.decide(request, policySet)) {
-					result.add(pii);
-				}
-				else if (policy != null && pdp.decide(request, policy)) {
-					result.add(pii);
-				}
+			if (authorized) {
+				result.add(pii);
 			}
 		}
 
 		// TODO create and trigger event data used for purpose
 		return result;
+	}
+
+	/**
+	 * Retrieves the PII list based on the PII attribute name. If the owner is
+	 * <code>null</code> only the attribute name is taken into account.
+	 *
+	 * @param attributeName	the PII attribute name
+	 * @param owner			the PII owner
+	 * @return	the PII list
+	 */
+	private List<PIIType> retrievePiiList(String attributeName, String owner) {
+		if (owner == null) {
+			return piiDao.findAllByAttributeNameAndOwner(attributeName, owner);
+		}
+
+		return piiDao.findAllByAttributeName(attributeName);
+	}
+
+	/**
+	 * Checks the authorization based on the given request and the list of
+	 * policy sets or policies.
+	 * Only the first element of the list is taken into account when taking the
+	 * access control decision. It can be either policy set or policy
+	 *
+	 * @param request	the access control request 
+	 * @param policies	list of policy sets or policies
+	 * @return	<code>true</code> if the access is permitted,
+	 * 			<code>false</code> otherwise
+	 */
+	private boolean isAuthorized(PdpRequest request,
+			List<PIITypePolicySetOrPolicyItem> policies) {
+		// empty policy list means there no access right
+		if (policies.isEmpty()) {
+			return false;
+		}
+
+		PIITypePolicySetOrPolicyItem policySetOrPolicy =
+				policies.get(0);
+		// extract policy set and policy
+		PolicySetType policySet = policySetOrPolicy.getItemPolicySet();
+		PolicyType policy = policySetOrPolicy.getItemPolicy();
+
+		// the policy set has the precedence over the policy:
+		// if the policy set exists, check the authorization against it
+		// otherwise check the authorization against the policy
+		return (policySet != null && pdp.decide(request, policySet))
+				|| (policy != null && pdp.decide(request, policy));
 	}
 
 }
