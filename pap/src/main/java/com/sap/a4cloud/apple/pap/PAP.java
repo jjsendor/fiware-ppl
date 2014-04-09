@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.a4cloud.apple;
+package com.sap.a4cloud.apple.pap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
