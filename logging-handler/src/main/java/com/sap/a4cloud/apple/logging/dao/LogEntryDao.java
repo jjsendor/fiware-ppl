@@ -74,7 +74,7 @@ public class LogEntryDao extends DaoImpl<LogEntry> {
 	public List<LogEntry> findByOwner(String owner) {
 		Query query = em.createQuery("SELECT logEntry FROM "
 				+ LogEntry.class.getSimpleName()
-				+ " logEntry WHERE logEntry.owner = :owner"
+				+ " logEntry WHERE logEntry.piiOwner = :owner"
 				+ " ORDER BY logEntry.date ASC");
 
 		query.setParameter("owner", owner);
