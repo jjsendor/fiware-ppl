@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.action;
+package com.sap.a4cloud.apple.obligation.action;
 
 /**
  * Deletes the personal data that is associated with the obligation that

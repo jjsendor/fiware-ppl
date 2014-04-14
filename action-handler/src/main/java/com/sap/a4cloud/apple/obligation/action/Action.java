@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.action;
+package com.sap.a4cloud.apple.obligation.action;
 
 /**
  * Interface representing action to be executed by the Action Handler.

@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.a4cloud.event;
+package com.sap.a4cloud.apple.obligation.event;
 
 /**
  * Interface for handling event-based triggers that constitute an obligation
