@@ -29,58 +29,47 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.action;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.sap.a4cloud.apple.logging.ILoggingHandler;
 
 import eu.primelife.ppl.pii.impl.PIIType;
 
 /**
- * Logs the event associated with the obligation that triggered this action.
- *
  * @author Jakub Sendor
  *
  */
-public class LogAction implements Action {
+public class LogActionTest {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
+	@Mock ILoggingHandler loggingHandler;
 
-	private ILoggingHandler loggingHandler;
-	private String message;
-	private String piiAttributeName;
-	private String piiOwner;
-
-	/**
-	 * Creates LogAction with a given log message, the PII attribute name and
-	 * the PII owner.
-	 *
-	 * @param loggingHandler		the logging handler
-	 * @param message				the log message
-	 * @param piiAttributeName		the PII attribute name
-	 * @param piiOwner				the PII owner
-	 */
-	LogAction(ILoggingHandler loggingHandler, String message,
-			String piiAttributeName, String piiOwner) {
-		this.loggingHandler = loggingHandler;
-		this.message = message;
-		this.piiAttributeName = piiAttributeName;
-		this.piiOwner = piiOwner;
+	@Before
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.Action#execute()
+	/**
+	 * Test method for {@link com.sap.a4cloud.apple.obligation.action.LogAction#execute()}.
 	 */
-	@Override
-	public void execute() {
-		PIIType pii = new PIIType();
+	@Test
+	public void testExecute() {
+		LogAction logAction = new LogAction(
+				loggingHandler,
+				"PII accessed for purpose: take over",
+				"The World",
+				"Ernst Stavro Blofeld");
 
-		pii.setAttributeName(piiAttributeName);
-		pii.setOwner(piiOwner);
+		logAction.execute();
 
-		loggingHandler.log(pii, message);
-		LOGGER.info("Executed log action for PII {} owned by {}",
-				piiAttributeName, piiOwner);
+		verify(loggingHandler).log(any(PIIType.class),
+				eq("PII accessed for purpose: take over"));
 	}
 
 }

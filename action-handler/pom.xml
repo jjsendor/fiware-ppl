@@ -15,5 +15,10 @@
       <artifactId>logging-handler</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>pap</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

@@ -29,6 +29,11 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sap.a4cloud.apple.pap.PAP;
+
 /**
  * Deletes the personal data that is associated with the obligation that
  * triggered this action.
@@ -38,13 +43,29 @@ package com.sap.a4cloud.apple.obligation.action;
  */
 public class DeleteAction implements Action {
 
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.Action#execute()
+	private static Logger LOGGER = LoggerFactory.getLogger(DeleteAction.class);
+
+	private Long piiId;
+	private PAP pap;
+
+	/**
+	 * Creates DeleteAction with a PII identifier.
+	 *
+	 * @param piiId	the PII id
+	 */
+	DeleteAction(PAP pap, Long piiId) {
+		super();
+		this.pap = pap;
+		this.piiId = piiId;
+	}
+
+	/**
+	 * Deletes PII from the Policy Administration Point.
 	 */
 	@Override
 	public void execute() {
-		// TODO Auto-generated method stub
-
+		pap.deletePii(piiId);
+		LOGGER.info("Executed delete action for PII {}", piiId);
 	}
 
 }

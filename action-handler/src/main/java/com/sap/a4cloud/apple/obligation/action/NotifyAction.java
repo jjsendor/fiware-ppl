@@ -57,7 +57,7 @@ public class NotifyAction implements Action {
 	 * @param recipient	notification channel recipient
 	 * @param message
 	 */
-	public NotifyAction(String media, String address, String recipient,
+	NotifyAction(String media, String address, String recipient,
 			String message) {
 		this.media = media;
 		this.address = address;

@@ -29,58 +29,66 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.action;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sap.a4cloud.apple.logging.ILoggingHandler;
+import com.sap.a4cloud.apple.logging.LoggingHandler;
+import com.sap.a4cloud.apple.pap.PAP;
 
 import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.ActionAnonymizePersonalData;
+import eu.primelife.ppl.policy.obligation.impl.ActionDeletePersonalData;
+import eu.primelife.ppl.policy.obligation.impl.ActionLog;
+import eu.primelife.ppl.policy.obligation.impl.ActionNotifyDataSubject;
+import eu.primelife.ppl.policy.obligation.impl.ActionSecureLog;
 
 /**
- * Logs the event associated with the obligation that triggered this action.
+ * Produces the instance of the {@link Action} based on the given description
+ * from the <code>&lt;Action&gt;</code> in the obligation that is a part of
+ * the PPL policy .
  *
  * @author Jakub Sendor
  *
  */
-public class LogAction implements Action {
-
-	private static Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
-
-	private ILoggingHandler loggingHandler;
-	private String message;
-	private String piiAttributeName;
-	private String piiOwner;
+public class ActionFactory {
 
 	/**
-	 * Creates LogAction with a given log message, the PII attribute name and
-	 * the PII owner.
-	 *
-	 * @param loggingHandler		the logging handler
-	 * @param message				the log message
-	 * @param piiAttributeName		the PII attribute name
-	 * @param piiOwner				the PII owner
+	 * Creates {@link Action} based on a given
+	 * {@link eu.primelife.ppl.policy.obligation.impl.Action}.
+	 * @param	pii		the PII associated with the obligation
+	 * @param	cause	the event that caused the obligation trigger
+	 * @param	action	the action element of the obligation
+	 * @return
 	 */
-	LogAction(ILoggingHandler loggingHandler, String message,
-			String piiAttributeName, String piiOwner) {
-		this.loggingHandler = loggingHandler;
-		this.message = message;
-		this.piiAttributeName = piiAttributeName;
-		this.piiOwner = piiOwner;
-	}
+	public static Action createAction(PIIType pii, String cause,
+			eu.primelife.ppl.policy.obligation.impl.Action action) {
+		if (action instanceof ActionDeletePersonalData) {
+			return new DeleteAction(new PAP(), pii.getHjid());
+		}
 
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.Action#execute()
-	 */
-	@Override
-	public void execute() {
-		PIIType pii = new PIIType();
+		if (action instanceof ActionAnonymizePersonalData) {
+			// TODO not yet implemented
+			return null;
+		}
 
-		pii.setAttributeName(piiAttributeName);
-		pii.setOwner(piiOwner);
+		if (action instanceof ActionNotifyDataSubject) {
+			ActionNotifyDataSubject actionNotify =
+					(ActionNotifyDataSubject) action;
+			String media = actionNotify.getMedia();
+			String address = actionNotify.getAddress();
+			String recipient = null;// FIXME update with the new schema
 
-		loggingHandler.log(pii, message);
-		LOGGER.info("Executed log action for PII {} owned by {}",
-				piiAttributeName, piiOwner);
+			return new NotifyAction(media, address, recipient, cause);
+		}
+
+		if (action instanceof ActionLog) {
+			return new LogAction(new LoggingHandler(), cause,
+					pii.getAttributeName(), pii.getOwner());
+		}
+
+		if (action instanceof ActionSecureLog) {
+			// TODO not yet implemented
+			return null;
+		}
+
+		return null;
 	}
 
 }

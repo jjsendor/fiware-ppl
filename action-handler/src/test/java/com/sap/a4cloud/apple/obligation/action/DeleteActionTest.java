@@ -29,58 +29,38 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.action;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.mockito.Mockito.verify;
 
-import com.sap.a4cloud.apple.logging.ILoggingHandler;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import eu.primelife.ppl.pii.impl.PIIType;
+import com.sap.a4cloud.apple.pap.PAP;
 
 /**
- * Logs the event associated with the obligation that triggered this action.
- *
  * @author Jakub Sendor
  *
  */
-public class LogAction implements Action {
+public class DeleteActionTest {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LogAction.class);
+	@Mock PAP pap;
 
-	private ILoggingHandler loggingHandler;
-	private String message;
-	private String piiAttributeName;
-	private String piiOwner;
-
-	/**
-	 * Creates LogAction with a given log message, the PII attribute name and
-	 * the PII owner.
-	 *
-	 * @param loggingHandler		the logging handler
-	 * @param message				the log message
-	 * @param piiAttributeName		the PII attribute name
-	 * @param piiOwner				the PII owner
-	 */
-	LogAction(ILoggingHandler loggingHandler, String message,
-			String piiAttributeName, String piiOwner) {
-		this.loggingHandler = loggingHandler;
-		this.message = message;
-		this.piiAttributeName = piiAttributeName;
-		this.piiOwner = piiOwner;
+	@Before
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.Action#execute()
+	/**
+	 * Test method for {@link com.sap.a4cloud.apple.obligation.action.DeleteAction#execute()}.
 	 */
-	@Override
-	public void execute() {
-		PIIType pii = new PIIType();
+	@Test
+	public void testExecute() {
+		DeleteAction deleteAction = new DeleteAction(pap, Long.valueOf(7));
 
-		pii.setAttributeName(piiAttributeName);
-		pii.setOwner(piiOwner);
+		deleteAction.execute();
 
-		loggingHandler.log(pii, message);
-		LOGGER.info("Executed log action for PII {} owned by {}",
-				piiAttributeName, piiOwner);
+		verify(pap).deletePii(Long.valueOf(7));
 	}
 
 }
