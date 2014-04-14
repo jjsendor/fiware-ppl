@@ -39,7 +39,7 @@ import eu.primelife.ppl.pii.impl.PIIType;
  * Handles logging operations for PPL Engine.
  *
  */
-public interface ILoggerHandler {
+public interface ILoggingHandler {
 
 	/**
 	 * Creates a log entry for particular event described by

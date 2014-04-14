@@ -44,7 +44,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sap.a4cloud.apple.logging.LoggerHandler;
+import com.sap.a4cloud.apple.logging.LoggingHandler;
 import com.sap.a4cloud.apple.logging.dao.LogEntryDao;
 import com.sap.a4cloud.apple.logging.entity.LogEntry;
 
@@ -52,13 +52,13 @@ import eu.primelife.ppl.pii.impl.PIIType;
 
 public class LoggerHandlerTest {
 
-	private LoggerHandler loggerHandler;
+	private LoggingHandler loggerHandler;
 	@Mock private LogEntryDao logEntryDao;
 
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
-		loggerHandler = new LoggerHandler(logEntryDao);
+		loggerHandler = new LoggingHandler(logEntryDao);
 	}
 
 	@After

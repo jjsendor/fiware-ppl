@@ -36,14 +36,14 @@ import com.sap.a4cloud.apple.logging.entity.LogEntry;
 
 import eu.primelife.ppl.pii.impl.PIIType;
 
-public class LoggerHandler implements ILoggerHandler {
+public class LoggingHandler implements ILoggingHandler {
 
 	private LogEntryDao logEntryDao;
 
 	/**
 	 * Default constructor for Logging Handler.
 	 */
-	public LoggerHandler() {
+	public LoggingHandler() {
 		logEntryDao = new LogEntryDao();
 	}
 
@@ -53,7 +53,7 @@ public class LoggerHandler implements ILoggerHandler {
 	 *
 	 * @param logEntryDao	Log Entry Data Access Object
 	 */
-	public LoggerHandler(LogEntryDao logEntryDao) {
+	public LoggingHandler(LogEntryDao logEntryDao) {
 		this.logEntryDao = logEntryDao;
 	}
 
