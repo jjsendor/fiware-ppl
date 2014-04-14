@@ -38,4 +38,9 @@ package com.sap.a4cloud.apple.obligation.event;
  */
 public class PersonalDataLostEvent extends AbstractEvent implements Event {
 
+	@Override
+	public String toString() {
+		return super.toString() + " lost";
+	}
+
 }

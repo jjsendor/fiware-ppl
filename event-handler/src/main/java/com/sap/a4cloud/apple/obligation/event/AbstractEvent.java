@@ -90,4 +90,9 @@ public abstract class AbstractEvent implements Event {
 		this.date = date;
 	}
 
+	@Override
+	public String toString() {
+		return "Event associated with personal data " + piiAttributeName
+				+ " belonging to " + piiOwner;
+	}
 }

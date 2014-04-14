@@ -58,4 +58,9 @@ public class PersonalDataAccessedEvent extends AbstractEvent implements Event {
 		this.purpose = purpose;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " accessed for purpose " + purpose;
+	}
+
 }

@@ -57,4 +57,9 @@ public class PolicyViolatedEvent extends AbstractEvent implements Event {
 		this.violation = violation;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " policy violated: " + violation;
+	}
+
 }

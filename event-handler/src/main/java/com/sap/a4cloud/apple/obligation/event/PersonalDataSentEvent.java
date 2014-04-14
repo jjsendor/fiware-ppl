@@ -59,4 +59,9 @@ public class PersonalDataSentEvent extends AbstractEvent implements Event {
 		this.sharedWith = sharedWith;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() + " sent to " + sharedWith;
+	}
+
 }
