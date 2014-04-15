@@ -27,24 +27,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.sap.research.primelife.dc.dao.OEEStatusDao;
-import com.sap.research.primelife.dc.entity.OEEStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import eu.primelife.ppl.policy.obligation.impl.TriggerAtTime;
-import eu.primelife.ppl.policy.obligation.impl.TriggerPeriodic;
+import com.sap.a4cloud.apple.obligation.dao.OEEStatusDao;
+import com.sap.a4cloud.apple.obligation.entity.OEEStatus;
+import com.sap.research.primelife.dao.PiiDao;
+
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
 
 public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 
+	private final static Logger LOGGER =
+			LoggerFactory.getLogger(TimeBasedTriggerHandler.class);
+
 	private static ITimeBasedTriggerHandler instance = null;
 	private OEEStatusDao oeeStatusDao;
-	private ITimeBasedTriggerFactory factory = new TimeBaseTriggerFactory();
-	private HashMap<OEEStatus, ITimeBasedTrigger> timeBasedTriggers;
+	private PiiDao piiDao;
+	private ITimeBasedTriggerFactory factory = new TimeBasedTriggerFactory();
+	private HashMap<Integer, ITimeBasedTrigger> timeBasedTriggers;
 
 	public static ITimeBasedTriggerHandler getInstance(){
 		if(instance == null){
@@ -52,55 +61,87 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 		}
 		return instance;
 	}
-	
-	protected TimeBasedTriggerHandler(){
-		oeeStatusDao = new OEEStatusDao();
-		factory = new TimeBaseTriggerFactory();
-		timeBasedTriggers = new HashMap<OEEStatus, ITimeBasedTrigger>();
+
+	protected TimeBasedTriggerHandler() {
+		this(new OEEStatusDao(), new PiiDao(), new TimeBasedTriggerFactory());
+		timeBasedTriggers = new HashMap<Integer, ITimeBasedTrigger>();
 	}
-	
-	protected TimeBasedTriggerHandler(OEEStatusDao oeeStatusDao, ITimeBasedTriggerFactory factory){
+
+	protected TimeBasedTriggerHandler(OEEStatusDao oeeStatusDao, PiiDao piiDao,
+			ITimeBasedTriggerFactory factory) {
 		this.oeeStatusDao = oeeStatusDao;
+		this.piiDao = piiDao;
 		this.factory = factory;
-		timeBasedTriggers = new HashMap<OEEStatus, ITimeBasedTrigger>();
-	}
-	
-	@Override
-	public void handle(OEEStatus oeeStatus) {
-		if((oeeStatus.getTrigger()) instanceof TriggerAtTime){
-			timeBasedTriggers.put(oeeStatus, factory.makeTimeBasedTriggerAtTime(oeeStatus));
-			timeBasedTriggers.get(oeeStatus).start();
-		}else if((oeeStatus.getTrigger()) instanceof TriggerPeriodic){
-			timeBasedTriggers.put(oeeStatus, factory.makeTimeBasedTriggerPeriodic(oeeStatus));
-			timeBasedTriggers.get(oeeStatus).start();
-		}
+		timeBasedTriggers = new HashMap<Integer, ITimeBasedTrigger>();
 	}
 
 	@Override
-	public void unHandle(OEEStatus oeeStatus) {
-		for(Entry<OEEStatus, ITimeBasedTrigger> entry : timeBasedTriggers.entrySet()){
-			if(entry.getKey().getId() == oeeStatus.getId()){
-				entry.getValue().cancel();
-				timeBasedTriggers.remove(entry.getKey());
-				break;
+	public void start() {
+		LOGGER.info("Starting time-based triggers");
+		// re-handle the obligations
+		List<OEEStatus> oeeList = oeeStatusDao.findObjects(OEEStatus.class);
+
+		for (OEEStatus oeeStatus : oeeList) {
+			long piiId = oeeStatus.getPiiId();
+			PIIType pii = piiDao.findObject(PIIType.class, piiId);
+
+			if (pii != null) {
+				Trigger trigger = oeeStatus.getTrigger();
+				Action action = oeeStatus.getAction();
+				handle(trigger, action, pii);
+			}
+			else {
+				LOGGER.warn("PII {} associated with a time-based trigger could not be found", piiId);
+				oeeStatusDao.deleteObject(oeeStatus);
 			}
 		}
 	}
 
 	@Override
-	public void start() {
-		// Reprise sur arret
-		List<OEEStatus> oeeList = oeeStatusDao.findObjects(OEEStatus.class);
-		for(OEEStatus oeeStatus : oeeList){
-			handle(oeeStatus);
+	public void stop() {
+		LOGGER.info("Stopping time-based triggers");
+
+		for (Entry<Integer, ITimeBasedTrigger> entry : timeBasedTriggers
+				.entrySet()) {
+			entry.getValue().cancel();
 		}
+
+		timeBasedTriggers.clear();
 	}
 
 	@Override
-	public void stop() {
-		for(Entry<OEEStatus, ITimeBasedTrigger> entry : timeBasedTriggers.entrySet()){
-			entry.getValue().cancel();
-		}
-		timeBasedTriggers.clear();
+	public void handle(Trigger trigger, Action action, PIIType pii) {
+		LOGGER.info("Handling time-based trigger {} for PII {}",
+				trigger.getName(), pii.getHjid());
+		ITimeBasedTrigger timeBasedTrigger =
+				factory.makeTimeBasedTrigger(trigger, action, pii);
+		int hashCode = triggerHashCode(trigger, pii.getHjid());
+		timeBasedTriggers.put(hashCode, timeBasedTrigger);
+		timeBasedTrigger.start();
 	}
+
+	@Override
+	public void unhandle(Trigger trigger, Long piiId) {
+		LOGGER.info("Removing time-based trigger {} for PII {}",
+				trigger.getName(), piiId);
+		int hashCode = triggerHashCode(trigger, piiId);
+		ITimeBasedTrigger timeBasedTrigger = timeBasedTriggers.get(hashCode);
+
+		if (timeBasedTrigger != null) {
+			timeBasedTrigger.cancel();
+			timeBasedTriggers.remove(hashCode);
+		}
+	}
+
+	/**
+	 * Helper method to calculate hash set key for a given trigger.
+	 *
+	 * @param trigger
+	 * @param piiId
+	 * @return	the hash code
+	 */
+	private int triggerHashCode(Trigger trigger, Long piiId) {
+		return piiId.hashCode() ^ (trigger.getHjid().hashCode() >>> 32);
+	}
+
 }

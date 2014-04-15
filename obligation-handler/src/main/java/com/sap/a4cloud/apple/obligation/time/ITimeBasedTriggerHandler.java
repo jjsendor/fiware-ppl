@@ -27,13 +27,47 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
 
+/**
+ * Interface for handling time-based triggers.
+ *
+ * @author Jakub Sendor
+ *
+ */
 public interface ITimeBasedTriggerHandler {
+
+	/**
+	 * Starts the time-based trigger handler after it was stopped,
+	 * e.g. after the engine restart.
+	 */
 	public void start();
+
+	/**
+	 * Stops the time-based trigger handler and cancels all of the scheduled
+	 * triggers.
+	 */
 	public void stop();
-	public void handle(OEEStatus oeeStatus);
-	public void unHandle(OEEStatus oeeStatus);
+
+	/**
+	 * Handles a time-based trigger to execute the action.
+	 *
+	 * @param trigger	the time-based trigger
+	 * @param action	the action to execute
+	 * @param pii		the PII associated with the trigger 
+	 */
+	public void handle(Trigger trigger, Action action, PIIType pii);
+
+	/**
+	 * Cancels a time-based trigger.
+	 *
+	 * @param trigger	the time-based trigger
+	 * @param piiId		the id of the PII associated with the trigger
+	 */
+	public void unhandle(Trigger trigger, Long piiId);
+
 }

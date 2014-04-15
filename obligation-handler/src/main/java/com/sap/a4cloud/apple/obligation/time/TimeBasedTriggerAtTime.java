@@ -27,105 +27,89 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.XMLGregorianCalendar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import com.sap.a4cloud.apple.obligation.action.ActionFactory;
+import com.sap.a4cloud.apple.obligation.action.ActionHandler;
+import com.sap.a4cloud.apple.obligation.action.IActionHandler;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
-import com.sap.research.primelife.dc.event.EventHandler;
-import com.sap.research.primelife.dc.event.IEventHandler;
-
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
 import eu.primelife.ppl.policy.obligation.impl.DateAndTime;
 import eu.primelife.ppl.policy.obligation.impl.Duration;
 import eu.primelife.ppl.policy.obligation.impl.TriggerAtTime;
 
 public class TimeBasedTriggerAtTime extends TimeBasedTrigger {
 
-	private final static Logger LOGGER = Logger.getLogger(TimeBasedTriggerAtTime.class);
+	private final static Logger LOGGER =
+			LoggerFactory.getLogger(TimeBasedTriggerAtTime.class);
+
 	protected Duration maxDelay;
 	protected DateAndTime start;
 	protected long startMillisec = 0; // Epoch time representation of the Start Date
-	
-	protected TimeBasedTriggerAtTime(OEEStatus oees){
-		this(oees, new EventHandler());
+
+
+	protected TimeBasedTriggerAtTime(TriggerAtTime trigger, Action action,
+			PIIType pii) {
+		this(trigger, action, pii, new ActionHandler());
 	}
-	
-	protected TimeBasedTriggerAtTime(OEEStatus oees, IEventHandler eventHandler){
-		super(oees, eventHandler);
-		maxDelay = ((TriggerAtTime)oees.getTrigger()).getMaxDelay();
-		start = ((TriggerAtTime)oees.getTrigger()).getStart();
+
+	protected TimeBasedTriggerAtTime(TriggerAtTime trigger, Action action,
+			PIIType pii, IActionHandler actionHandler) {
+		super(action, pii, actionHandler);
+		maxDelay = trigger.getMaxDelay();
+		start = trigger.getStart();
 	}
-	
+
 	@Override
 	public void start() {
-		final TimeBasedTriggerAtTime trigger = this;
+		final TimeBasedTriggerAtTime timeBasedTrigger = this;
 		timer = new Timer();
 		timerTask = new TimerTask() {
-            public void run()
-            {
-            	TimeBasedTriggerAtTime.tick(trigger, this.scheduledExecutionTime());
-            }
-        };
-        
-        if(!this.oeeStatus.isTriggeredOnce()){
-	        Date now = new Date();
-	        if(start.getStartNow() != null){
-	        	start.setDateAndTimeItem(new Date());
-	        	start.setStartNowObject(null);
-	        	start.setStartNow(null);
-	        }
-			
-	        
-	        if(start.getDateAndTime() instanceof XMLGregorianCalendar){
-	        	XMLGregorianCalendar xmlGregorianDate = start.getDateAndTime();
-	        	
-	        	if(checkXmlGregorianDate(xmlGregorianDate)){
-	        	
-		        	Calendar calendar = Calendar.getInstance();
-		        	calendar.set(	xmlGregorianDate.getYear(), 
-		        					xmlGregorianDate.getMonth()-1, // XMLGregorianCalendar month: 1-12, Calendar month: 0-11
-		        					xmlGregorianDate.getDay(), 
-		        					xmlGregorianDate.getHour(), 
-		        					xmlGregorianDate.getMinute(), 
-		        					xmlGregorianDate.getSecond());
-		        	
-		        	Date startDate = calendar.getTime();
-		        	startMillisec = startDate.getTime();
-	        	}
-	        }
-	
-	        if((startMillisec - now.getTime()) + maxDelay.getInSecond() * 1000 >= 0){
-	        	timer.schedule(timerTask, (startMillisec - now.getTime()) + maxDelay.getInSecond() * 1000);
-	        	LOGGER.info("Timer started");        	
-	        }else{
-	        	if(!this.oeeStatus.isTriggeredOnce()){
-	        		timer.schedule(timerTask, 1);        		
-	        	}
-	        }
-        }
+			public void run() {
+				TimeBasedTriggerAtTime.tick(action, pii,
+						this.scheduledExecutionTime(), actionHandler);
+				timeBasedTrigger.cancel();
+			}
+		};
+
+		Date now = new Date();
+		if (start.getStartNow() != null) {
+			start.setDateAndTimeItem(new Date());
+			start.setStartNowObject(null);
+			start.setStartNow(null);
+		}
+
+		startMillisec = toMilliseconds(start);
+
+		long l = (startMillisec - now.getTime()) + maxDelay.getInSecond() * 1000;
+		if (l >= 0) {
+			timer.schedule(timerTask, (startMillisec - now.getTime()) + maxDelay.getInSecond() * 1000);
+			LOGGER.info("Timer for trigger at time associated with PII {} started", pii.getHjid());
+		}
+		else {
+			timer.schedule(timerTask, 1);
+		}
 	}
-	
-	private synchronized static void tick(TimeBasedTriggerAtTime trigger, long time){
-		LOGGER.info("#" + trigger.pii.getHjid() + " TriggerAtTime triggered at " + time);
-		trigger.oeeStatus.setTriggeredOnce(true);
-		trigger.eventHandler.fireAtTime(trigger.pii);
-		trigger.cancel();
+
+	protected synchronized static void tick(Action action, PIIType pii,
+			long time, IActionHandler actionHandler) {
+		LOGGER.info("TriggerAtTime for {} triggered at {}", pii.getHjid(),
+				time);
+
+		// create and trigger the action
+		com.sap.a4cloud.apple.obligation.action.Action actionToHandle =
+				ActionFactory.createAction(pii,
+						"Scheduled action triggered at " + time,
+						action);
+		actionHandler.handle(actionToHandle);
 	}
-	
-	private boolean checkXmlGregorianDate(XMLGregorianCalendar xmlGregorianDate){
-		return (xmlGregorianDate.getYear() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getMonth() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getDay() != DatatypeConstants.FIELD_UNDEFINED &&  
-				xmlGregorianDate.getHour() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getMinute() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getSecond() != DatatypeConstants.FIELD_UNDEFINED);
-	}
+
 }

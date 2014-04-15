@@ -27,131 +27,112 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.XMLGregorianCalendar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import com.sap.a4cloud.apple.obligation.action.ActionFactory;
+import com.sap.a4cloud.apple.obligation.action.ActionHandler;
+import com.sap.a4cloud.apple.obligation.action.IActionHandler;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
-import com.sap.research.primelife.dc.event.EventHandler;
-import com.sap.research.primelife.dc.event.IEventHandler;
-
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
 import eu.primelife.ppl.policy.obligation.impl.DateAndTime;
 import eu.primelife.ppl.policy.obligation.impl.Duration;
 import eu.primelife.ppl.policy.obligation.impl.TriggerPeriodic;
 
 public class TimeBasedTriggerPeriodic extends TimeBasedTrigger {
 
-	private final static Logger LOGGER = Logger.getLogger(TimeBasedTriggerPeriodicTest.class);
+	private final static Logger LOGGER =
+			LoggerFactory.getLogger(TimeBasedTriggerPeriodic.class);
+
 	protected Duration period;
 	protected Duration maxDelay;
 	protected DateAndTime start;
 	protected DateAndTime end;
 	protected Long startMillisec; // Epoch time representation of the Start Date
 	protected Long stopMillisec; // Epoch time representation of the End Date
-	
-	protected TimeBasedTriggerPeriodic(OEEStatus oees) {
-		this(oees, new EventHandler());
+
+
+	protected TimeBasedTriggerPeriodic(TriggerPeriodic trigger, Action action,
+			PIIType pii) {
+		this(trigger, action, pii, new ActionHandler());
 	}
-	
-	protected TimeBasedTriggerPeriodic(OEEStatus oees, IEventHandler eventHandler) {
-		super(oees, eventHandler);
-		period = ((TriggerPeriodic)oees.getTrigger()).getPeriod();
-		start = ((TriggerPeriodic)oees.getTrigger()).getStart();
-		end = ((TriggerPeriodic)oees.getTrigger()).getEnd();
-		maxDelay = ((TriggerPeriodic)oees.getTrigger()).getMaxDelay();
+
+	protected TimeBasedTriggerPeriodic(TriggerPeriodic trigger, Action action,
+			PIIType pii, IActionHandler actionHandler) {
+		super(action, pii, actionHandler);
+		period = trigger.getPeriod();
+		start = trigger.getStart();
+		end = trigger.getEnd();
+		maxDelay = trigger.getMaxDelay();
 	}
 
 	@Override
 	public void start() {
-		final TimeBasedTriggerPeriodic trigger = this;
+		final TimeBasedTriggerPeriodic timeBasedTrigger = this;
 		timer = new Timer();
 		timerTask = new TimerTask() {
-            public void run()
-            {
-            	TimeBasedTriggerPeriodic.tick(trigger, this.scheduledExecutionTime());
-            	if(stopMillisec != null && stopMillisec - System.currentTimeMillis() <= 0){
-            		trigger.cancel();
-            	}
-            }
-        };
-        
-        
-        Date now = new Date();
-        if(start.getStartNow() != null){
-        	start.setDateAndTimeItem(new Date());
-        	start.setStartNowObject(null);
-        	start.setStartNow(null);
-        }
-        
-        if(start.getDateAndTime() instanceof XMLGregorianCalendar){
-        	XMLGregorianCalendar xmlGregorianDate = start.getDateAndTime();
-        	if(checkXmlGregorianDate(xmlGregorianDate)){
-	        	Calendar calendar = Calendar.getInstance();
-	        	calendar.set(	xmlGregorianDate.getYear(), 
-	        					xmlGregorianDate.getMonth()-1, // XMLGregorianCalendar month: 1-12, Calendar month: 0-11
-	        					xmlGregorianDate.getDay(), 
-	        					xmlGregorianDate.getHour(), 
-	        					xmlGregorianDate.getMinute(), 
-	        					xmlGregorianDate.getSecond());
-	        	
-	        	Date startDate = calendar.getTime();
-	        	startMillisec = startDate.getTime();
-        	}
-        }
-        
-        stopMillisec = null;
-        if(end.getDateAndTime() instanceof XMLGregorianCalendar){
-        	XMLGregorianCalendar xmlGregorianDate = end.getDateAndTime();
-        	if(checkXmlGregorianDate(xmlGregorianDate)){
-	        	Calendar calendar = Calendar.getInstance();
-	        	calendar.set(	xmlGregorianDate.getYear(), 
-	        					xmlGregorianDate.getMonth()-1, // XMLGregorianCalendar month: 1-12, Calendar month: 0-11
-	        					xmlGregorianDate.getDay(), 
-	        					xmlGregorianDate.getHour(), 
-	        					xmlGregorianDate.getMinute(), 
-	        					xmlGregorianDate.getSecond());
-	        	
-	        	Date endDate = calendar.getTime();
-	        	stopMillisec = endDate.getTime();
-        	}
-        }
-        
-        if(stopMillisec - now.getTime() > 0){
-        	// Launch Timer
-        	if(startMillisec - now.getTime() <= 0){
-        		// Start Date is already passed
-        		long l = (now.getTime() - startMillisec) - (period.getInSecond() * 1000);
-        		long p = (period.getInSecond() * 1000) - l;
-        		timer.schedule(timerTask, p, period.getInSecond() * 1000);
-        	}else{
-        		// Start Date is in the future
-        		timer.schedule(timerTask, (startMillisec - now.getTime()) + period.getInSecond() * 1000, period.getInSecond() * 1000);
-        	}
-        	
-        	LOGGER.info("Timer started");
-        }
+			public void run() {
+				TimeBasedTriggerPeriodic.tick(action, pii,
+						this.scheduledExecutionTime(), actionHandler);
+
+				if (stopMillisec != null
+						&& stopMillisec - System.currentTimeMillis() <= 0) {
+					timeBasedTrigger.cancel();
+				}
+			}
+		};
+
+		Date now = new Date();
+
+		if (start.getStartNow() != null){
+			start.setDateAndTimeItem(new Date());
+			start.setStartNowObject(null);
+			start.setStartNow(null);
+		}
+
+		startMillisec = toMilliseconds(start);
+
+		stopMillisec = toMilliseconds(end);
+
+		if (stopMillisec - now.getTime() > 0) {
+			// Launch Timer
+			if (startMillisec - now.getTime() <= 0) {
+				// Start Date has already passed
+				long l = (now.getTime() - startMillisec)
+						- (period.getInSecond() * 1000);
+				long p = (period.getInSecond() * 1000) - l;
+				timer.schedule(timerTask, p, period.getInSecond() * 1000);
+			}
+			else {
+				// Start Date is in the future
+				timer.schedule(timerTask,
+						(startMillisec - now.getTime())
+							+ period.getInSecond() * 1000,
+						period.getInSecond() * 1000);
+			}
+
+			LOGGER.info("Timer for periodic trigger associated with PII {} started", pii.getHjid());
+		}
 	}
-	
-	private synchronized static void tick(TimeBasedTriggerPeriodic trigger, long time){
-		LOGGER.info("TriggerPeriodic triggered at " + time);
-		trigger.eventHandler.firePeriodic(trigger.pii);
-	}
-	
-	private boolean checkXmlGregorianDate(XMLGregorianCalendar xmlGregorianDate){
-		return (xmlGregorianDate.getYear() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getMonth() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getDay() != DatatypeConstants.FIELD_UNDEFINED &&  
-				xmlGregorianDate.getHour() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getMinute() != DatatypeConstants.FIELD_UNDEFINED && 
-				xmlGregorianDate.getSecond() != DatatypeConstants.FIELD_UNDEFINED);
+
+	protected synchronized static void tick(Action action, PIIType pii,
+			long time, IActionHandler actionHandler) {
+		LOGGER.info("TriggerPeriodic for {} triggered at {}", pii.getHjid(),
+				time);
+
+		// create and trigger the action
+		com.sap.a4cloud.apple.obligation.action.Action actionToHandle =
+				ActionFactory.createAction(pii,
+						"Periodic action triggered at " + time,
+						action);
+		actionHandler.handle(actionToHandle);
 	}
 
 }

@@ -27,12 +27,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
 
 public interface ITimeBasedTriggerFactory {
 
-	public TimeBasedTriggerAtTime makeTimeBasedTriggerAtTime(OEEStatus oeeStatus);
-	public TimeBasedTriggerPeriodic makeTimeBasedTriggerPeriodic(OEEStatus oeeStatus);
+	public ITimeBasedTrigger makeTimeBasedTrigger(Trigger trigger,
+			Action action, PIIType pii);
+
 }

@@ -27,19 +27,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+import eu.primelife.ppl.policy.obligation.impl.TriggerAtTime;
+import eu.primelife.ppl.policy.obligation.impl.TriggerPeriodic;
 
-public class TimeBaseTriggerFactory implements ITimeBasedTriggerFactory{
+public class TimeBasedTriggerFactory implements ITimeBasedTriggerFactory {
 
 	@Override
-	public TimeBasedTriggerAtTime makeTimeBasedTriggerAtTime(OEEStatus oeeStatus){
-		return new TimeBasedTriggerAtTime(oeeStatus);
+	public ITimeBasedTrigger makeTimeBasedTrigger(Trigger trigger,
+			Action action, PIIType pii) {
+		if (trigger instanceof TriggerAtTime) {
+			TriggerAtTime triggerAtTime = (TriggerAtTime) trigger;
+			return new TimeBasedTriggerAtTime(triggerAtTime, action, pii);
+		}
+		else if (trigger instanceof TriggerPeriodic) {
+			TriggerPeriodic triggerPeriodic = (TriggerPeriodic) trigger;
+			return new TimeBasedTriggerPeriodic(triggerPeriodic , action, pii);
+		}
+
+		return null;
 	}
-	
-	@Override
-	public TimeBasedTriggerPeriodic makeTimeBasedTriggerPeriodic(OEEStatus oeeStatus){
-		return new TimeBasedTriggerPeriodic(oeeStatus);
-	}
+
 }

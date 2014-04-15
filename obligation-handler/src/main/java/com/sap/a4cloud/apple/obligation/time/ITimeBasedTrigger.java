@@ -27,9 +27,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
+/**
+ * Common interface for the time-based triggers.
+ * 
+ * @author Jakub Sendor
+ *
+ */
 public interface ITimeBasedTrigger {
+
+	/**
+	 * Starts the trigger.
+	 */
 	public void start();
+
+	/**
+	 * Cancels the trigger.
+	 */
 	public void cancel();
+
 }

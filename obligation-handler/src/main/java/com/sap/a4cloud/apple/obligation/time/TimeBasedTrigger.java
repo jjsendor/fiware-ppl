@@ -27,46 +27,90 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.timebasedtrigger;
+package com.sap.a4cloud.apple.obligation.time;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.research.primelife.dc.entity.OEEStatus;
-import com.sap.research.primelife.dc.event.EventHandler;
-import com.sap.research.primelife.dc.event.IEventHandler;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sap.a4cloud.apple.obligation.action.ActionHandler;
+import com.sap.a4cloud.apple.obligation.action.IActionHandler;
 
 import eu.primelife.ppl.pii.impl.PIIType;
-import eu.primelife.ppl.pii.impl.PiiUniqueId;
 import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.DateAndTime;
 
 public abstract class TimeBasedTrigger implements ITimeBasedTrigger{
 
-	protected OEEStatus oeeStatus;
+	private static final Logger LOGGER =
+			LoggerFactory.getLogger(TimeBasedTrigger.class);
+
 	protected Action action;
-	protected PiiUniqueId puid;
 	protected PIIType pii;
-	protected IEventHandler eventHandler;
+	protected IActionHandler actionHandler;
 	protected Timer timer;
 	protected TimerTask timerTask;
-	
-	protected TimeBasedTrigger(OEEStatus oees){
-		this(oees, new EventHandler());
+
+	protected TimeBasedTrigger(Action action, PIIType pii) {
+		this(action, pii, new ActionHandler());
 	}
-	
-	protected TimeBasedTrigger(OEEStatus oees, IEventHandler eventHandler){
-		oeeStatus = oees;
-		action = oees.getAction();
-		puid = oees.getPiiUniqueId();
-		pii = oees.getPiiUniqueId().getPii();
-		this.eventHandler = eventHandler;
+
+	protected TimeBasedTrigger(Action action, PIIType pii,
+			IActionHandler actionHandler) {
+		this.action = action;
+		this.pii = pii;
+		this.actionHandler = actionHandler;
 		timer = new Timer();
 	}
-	
+
 	public synchronized void cancel() {
-		this.timerTask.cancel();
-        this.timer.cancel();
+		LOGGER.info("Time-based trigger for PII {} canceled", pii.getHjid());
+		timer.cancel();
+
+		if (timerTask != null) {
+			timerTask.cancel();
+		}
 	} 
 	
 	public abstract void start();
+
+	protected Long toMilliseconds(DateAndTime date) {
+		XMLGregorianCalendar xmlGregorianDate = date.getDateAndTime();
+
+		if (checkXmlGregorianDate(xmlGregorianDate)) {
+			Date startDate = toDate(xmlGregorianDate);
+			return startDate.getTime();
+		}
+
+		return null;
+	}
+
+	private Date toDate(XMLGregorianCalendar xmlGregorianDate) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(xmlGregorianDate.getYear(), 
+				xmlGregorianDate.getMonth() - 1, // XMLGregorianCalendar month: 1-12, Calendar month: 0-11
+				xmlGregorianDate.getDay(), 
+				xmlGregorianDate.getHour(), 
+				xmlGregorianDate.getMinute(), 
+				xmlGregorianDate.getSecond());
+
+		return calendar.getTime();
+	}
+
+	private boolean checkXmlGregorianDate(XMLGregorianCalendar xmlGregorianDate) {
+		return xmlGregorianDate.getYear() != DatatypeConstants.FIELD_UNDEFINED
+				&& xmlGregorianDate.getMonth() != DatatypeConstants.FIELD_UNDEFINED
+				&& xmlGregorianDate.getDay() != DatatypeConstants.FIELD_UNDEFINED
+				&& xmlGregorianDate.getHour() != DatatypeConstants.FIELD_UNDEFINED
+				&& xmlGregorianDate.getMinute() != DatatypeConstants.FIELD_UNDEFINED
+				&& xmlGregorianDate.getSecond() != DatatypeConstants.FIELD_UNDEFINED;
+	}
+
 }
