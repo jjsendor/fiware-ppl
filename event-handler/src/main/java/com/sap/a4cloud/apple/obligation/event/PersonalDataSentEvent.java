@@ -38,7 +38,14 @@ package com.sap.a4cloud.apple.obligation.event;
  */
 public class PersonalDataSentEvent extends AbstractEvent implements Event {
 
+	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerPersonalDataSent";
+
 	private String sharedWith;
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
 	/**
 	 * Returns the identifier of the third party with whom the personal data

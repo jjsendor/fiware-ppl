@@ -38,7 +38,14 @@ package com.sap.a4cloud.apple.obligation.event;
  */
 public class PersonalDataAccessedEvent extends AbstractEvent implements Event {
 
+	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerPersonalDataAccessedForPurpose";
+
 	private String purpose;
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
 	/**
 	 * Returns the purpose for which the personal data was accessed.

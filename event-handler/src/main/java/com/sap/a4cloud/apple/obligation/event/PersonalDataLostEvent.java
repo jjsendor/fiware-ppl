@@ -38,6 +38,13 @@ package com.sap.a4cloud.apple.obligation.event;
  */
 public class PersonalDataLostEvent extends AbstractEvent implements Event {
 
+	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerPersonalDataLost";
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " lost";

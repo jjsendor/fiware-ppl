@@ -40,6 +40,13 @@ import java.util.Date;
 public interface Event {
 
 	/**
+	 * Returns trigger name based on PPL schema.
+	 *
+	 * @return	the trigger name
+	 */
+	public String getName();
+
+	/**
 	 * Returns the id of the PII associated with this event.
 	 *
 	 * @return	the id of the PII associated with this event

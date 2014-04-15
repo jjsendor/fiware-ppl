@@ -38,6 +38,13 @@ package com.sap.a4cloud.apple.obligation.event;
  */
 public class PersonalDataDeletedEvent extends AbstractEvent implements Event {
 
+	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerPersonalDataDeleted";
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
 	@Override
 	public String toString() {
 		return super.toString() + " deleted";

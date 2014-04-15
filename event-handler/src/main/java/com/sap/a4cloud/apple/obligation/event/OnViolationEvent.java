@@ -35,9 +35,16 @@ package com.sap.a4cloud.apple.obligation.event;
  * @author Jakub Sendor
  *
  */
-public class PolicyViolatedEvent extends AbstractEvent implements Event {
+public class OnViolationEvent extends AbstractEvent implements Event {
+
+	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerOnViolation";
 
 	private String violation;
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
 	/**
 	 * Returns description of violation.
