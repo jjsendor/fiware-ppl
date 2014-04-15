@@ -79,8 +79,12 @@ public class ActionFactory {
 		}
 
 		if (action instanceof ActionLog) {
-			return new LogAction(new LoggingHandler(), cause,
-					pii.getAttributeName(), pii.getOwner());
+			if (pii != null) {
+				return new LogAction(new LoggingHandler(), cause,
+						pii.getAttributeName(), pii.getOwner());
+			}
+
+			return new LogAction(new LoggingHandler(), cause, null, null);
 		}
 
 		if (action instanceof ActionSecureLog) {
