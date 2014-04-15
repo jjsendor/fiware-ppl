@@ -50,7 +50,7 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 			LoggerFactory.getLogger(TimeBasedTriggerHandler.class);
 
 	private static ITimeBasedTriggerHandler instance = null;
-	private ObligationTriggerDao oeeStatusDao;
+	private ObligationTriggerDao obligationTriggerDao;
 	private PiiDao piiDao;
 	private ITimeBasedTriggerFactory factory = new TimeBasedTriggerFactory();
 	private HashMap<Integer, ITimeBasedTrigger> timeBasedTriggers;
@@ -63,13 +63,14 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 	}
 
 	protected TimeBasedTriggerHandler() {
-		this(new ObligationTriggerDao(), new PiiDao(), new TimeBasedTriggerFactory());
+		this(new ObligationTriggerDao(), new PiiDao(),
+				new TimeBasedTriggerFactory());
 		timeBasedTriggers = new HashMap<Integer, ITimeBasedTrigger>();
 	}
 
-	protected TimeBasedTriggerHandler(ObligationTriggerDao oeeStatusDao, PiiDao piiDao,
-			ITimeBasedTriggerFactory factory) {
-		this.oeeStatusDao = oeeStatusDao;
+	protected TimeBasedTriggerHandler(ObligationTriggerDao obligationTriggerDao,
+			PiiDao piiDao, ITimeBasedTriggerFactory factory) {
+		this.obligationTriggerDao = obligationTriggerDao;
 		this.piiDao = piiDao;
 		this.factory = factory;
 		timeBasedTriggers = new HashMap<Integer, ITimeBasedTrigger>();
@@ -79,20 +80,21 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 	public void start() {
 		LOGGER.info("Starting time-based triggers");
 		// re-handle the obligations
-		List<ObligationTrigger> oeeList = oeeStatusDao.findObjects(ObligationTrigger.class);
+		List<ObligationTrigger> obligationTriggerList =
+				obligationTriggerDao.findObjects(ObligationTrigger.class);
 
-		for (ObligationTrigger oeeStatus : oeeList) {
-			long piiId = oeeStatus.getPiiId();
+		for (ObligationTrigger obligationTrigger: obligationTriggerList) {
+			long piiId = obligationTrigger.getPiiId();
 			PIIType pii = piiDao.findObject(PIIType.class, piiId);
 
 			if (pii != null) {
-				Trigger trigger = oeeStatus.getTrigger();
-				Action action = oeeStatus.getAction();
+				Trigger trigger = obligationTrigger.getTrigger();
+				Action action = obligationTrigger.getAction();
 				handle(trigger, action, pii);
 			}
 			else {
 				LOGGER.warn("PII {} associated with a time-based trigger could not be found", piiId);
-				oeeStatusDao.deleteObject(oeeStatus);
+				obligationTriggerDao.deleteObject(obligationTrigger);
 			}
 		}
 	}

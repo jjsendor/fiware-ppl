@@ -53,7 +53,7 @@ public class ObligationHandler implements IObligationHandler {
 	private final static Logger LOGGER = LoggerFactory.getLogger(
 			ObligationHandler.class);
 
-	private ObligationTriggerDao oeeStatusDao;
+	private ObligationTriggerDao obligationTriggerDao;
 	private ITimeBasedTriggerHandler timeBasedTriggerHandler;
 	private static ObligationHandler instance = null;
 
@@ -66,12 +66,13 @@ public class ObligationHandler implements IObligationHandler {
 	}
 
 	protected ObligationHandler() {
-		oeeStatusDao = new ObligationTriggerDao();
+		obligationTriggerDao = new ObligationTriggerDao();
 		timeBasedTriggerHandler = TimeBasedTriggerHandler.getInstance();
 	}
 
-	protected ObligationHandler(ObligationTriggerDao oeeStatusDao, ITimeBasedTriggerHandler timeBasedTriggerHandler) {
-		this.oeeStatusDao = oeeStatusDao;
+	protected ObligationHandler(ObligationTriggerDao obligationTriggerDao,
+			ITimeBasedTriggerHandler timeBasedTriggerHandler) {
+		this.obligationTriggerDao = obligationTriggerDao;
 		this.timeBasedTriggerHandler = timeBasedTriggerHandler;
 	}
 
@@ -82,7 +83,8 @@ public class ObligationHandler implements IObligationHandler {
 	}
 
 	public void removeObligations(PIIType pii) {
-		List<ObligationTrigger> oeeStatusList = oeeStatusDao.findByPiiId(pii.getHjid());
+		List<ObligationTrigger> oeeStatusList =
+				obligationTriggerDao.findByPiiId(pii.getHjid());
 
 		// remove each obligation trigger one by one
 		for (ObligationTrigger oeeStatus : oeeStatusList){
@@ -98,7 +100,7 @@ public class ObligationHandler implements IObligationHandler {
 			timeBasedTriggerHandler.unhandle(trigger, piiId);
 		}
 
-		oeeStatusDao.deleteObject(oeeStatus);
+		obligationTriggerDao.deleteObject(oeeStatus);
 	}
 
 	private boolean isTimeBased(Trigger trigger) {
@@ -125,7 +127,7 @@ public class ObligationHandler implements IObligationHandler {
 			oeeStatus.setAction(action);
 			oeeStatus.setTrigger(trigger);
 
-			oeeStatusDao.persistObject(oeeStatus);
+			obligationTriggerDao.persistObject(oeeStatus);
 
 			// configure time-based trigger handler
 			if (isTimeBased(trigger)) {
