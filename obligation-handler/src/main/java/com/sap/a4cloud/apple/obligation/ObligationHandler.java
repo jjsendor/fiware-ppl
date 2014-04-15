@@ -27,97 +27,111 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.obligation;
+package com.sap.a4cloud.apple.obligation;
 
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
-
-import com.sap.research.primelife.dc.dao.OEEStatusDao;
-import com.sap.research.primelife.dc.dao.PiiUniqueIdDao;
-import com.sap.research.primelife.dc.entity.OEEStatus;
-import com.sap.research.primelife.dc.timebasedtrigger.ITimeBasedTriggerHandler;
-import com.sap.research.primelife.dc.timebasedtrigger.TimeBasedTriggerHandler;
+import com.sap.a4cloud.apple.obligation.dao.ObligationTriggerDao;
+import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
+import com.sap.a4cloud.apple.obligation.time.ITimeBasedTriggerHandler;
+import com.sap.a4cloud.apple.obligation.time.TimeBasedTriggerHandler;
 
 import eu.primelife.ppl.pii.impl.PIIType;
-import eu.primelife.ppl.pii.impl.PiiUniqueId;
+import eu.primelife.ppl.policy.obligation.impl.Action;
 import eu.primelife.ppl.policy.obligation.impl.Obligation;
 import eu.primelife.ppl.policy.obligation.impl.ObligationsSet;
 import eu.primelife.ppl.policy.obligation.impl.Trigger;
 import eu.primelife.ppl.policy.obligation.impl.TriggerAtTime;
 import eu.primelife.ppl.policy.obligation.impl.TriggerPeriodic;
+import eu.primelife.ppl.policy.obligation.impl.TriggersSetTriggerItem;
 
-public class ObligationHandler implements IObligationHandler{
-	
-	private final static Logger LOGGER = Logger.getLogger(ObligationHandler.class);
-	
-	private OEEStatusDao oeeStatusDao;
-	private PiiUniqueIdDao piiUniqueIdDao;
+public class ObligationHandler implements IObligationHandler {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(
+			ObligationHandler.class);
+
+	private ObligationTriggerDao oeeStatusDao;
 	private ITimeBasedTriggerHandler timeBasedTriggerHandler;
 	private static ObligationHandler instance = null;
-	
-	public static ObligationHandler getInstance(){
-		if(instance == null){
+
+	public static ObligationHandler getInstance() {
+		if (instance == null) {
 			instance = new ObligationHandler();
 		}
+
 		return instance;
 	}
 
-	protected ObligationHandler(){
-		oeeStatusDao = new OEEStatusDao();
-		piiUniqueIdDao = new PiiUniqueIdDao();
+	protected ObligationHandler() {
+		oeeStatusDao = new ObligationTriggerDao();
 		timeBasedTriggerHandler = TimeBasedTriggerHandler.getInstance();
 	}
-	
-	protected ObligationHandler(OEEStatusDao oeeStatusDao, PiiUniqueIdDao piiUniqueIdDao, ITimeBasedTriggerHandler timeBasedTriggerHandler){
+
+	protected ObligationHandler(ObligationTriggerDao oeeStatusDao, ITimeBasedTriggerHandler timeBasedTriggerHandler) {
 		this.oeeStatusDao = oeeStatusDao;
-		this.piiUniqueIdDao = piiUniqueIdDao;
 		this.timeBasedTriggerHandler = timeBasedTriggerHandler;
 	}
-	
-	public void addObligations(ObligationsSet obligationSet, PIIType pii){
-		PiiUniqueId piiUniqueId = piiUniqueIdDao.findByPiiId(pii.getHjid());
-		
-		if(piiUniqueId != null){
-			for (Obligation obligation: obligationSet.getObligation()){
-				addObligation(obligation, pii, piiUniqueId);
-			}			
-		}
-	}
-	
-	public void deleteObligations(PIIType pii) {
-		PiiUniqueId piiUid = piiUniqueIdDao.findByPiiId(pii.getHjid());
 
-		try {
-			// Delete OEESTATUS related to piiUid
-			List<OEEStatus> oeeStatusList = oeeStatusDao.findByPiiUid(piiUid);
-			for(OEEStatus oeeStatus : oeeStatusList){
-				if((oeeStatus.getTrigger()) instanceof TriggerAtTime || (oeeStatus.getTrigger()) instanceof TriggerPeriodic){
-					timeBasedTriggerHandler.unHandle(oeeStatus);					
-				}
-				oeeStatusDao.deleteObject(oeeStatus);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error while deleting obligations", e);
+	public void addObligations(ObligationsSet obligationSet, PIIType pii) {
+		for (Obligation obligation: obligationSet.getObligation()) {
+			addObligation(obligation, pii);
 		}
 	}
-	
-	private void addObligation(Obligation obligation, PIIType pii, PiiUniqueId puid){
-		for (JAXBElement<? extends Trigger> trigger : obligation.getTriggersSet().getTrigger()){
-			OEEStatus oeeStatus = new OEEStatus();
-			oeeStatus.setPiiUniqueId(puid);
-			oeeStatus.setTriggerName(trigger.getName().toString());
-			oeeStatus.setAction(obligation.getActionValue());	
-			oeeStatus.setTrigger(trigger.getValue());	
+
+	public void removeObligations(PIIType pii) {
+		List<ObligationTrigger> oeeStatusList = oeeStatusDao.findByPiiId(pii.getHjid());
+
+		// remove each obligation trigger one by one
+		for (ObligationTrigger oeeStatus : oeeStatusList){
+			deleteObligation(oeeStatus);
+		}
+	}
+
+	private void deleteObligation(ObligationTrigger oeeStatus) {
+		Trigger trigger = oeeStatus.getTrigger();
+		Long piiId = oeeStatus.getPiiId();
+
+		if (isTimeBased(trigger)) {
+			timeBasedTriggerHandler.unhandle(trigger, piiId);
+		}
+
+		oeeStatusDao.deleteObject(oeeStatus);
+	}
+
+	private boolean isTimeBased(Trigger trigger) {
+		return trigger instanceof TriggerAtTime
+				|| trigger instanceof TriggerPeriodic;
+	}
+
+	private void addObligation(Obligation obligation, PIIType pii) {
+		// extract the list of triggers
+		List<TriggersSetTriggerItem> triggerItems =
+				obligation.getTriggersSet().getTriggerItems();
+
+		for (TriggersSetTriggerItem triggerItem : triggerItems){
+			Trigger trigger = triggerItem.getItemValue();
+			Action action = obligation.getActionValue();
+
+			LOGGER.info("Adding obligation trigger {} for PII {}",
+					trigger.getName(), pii.getHjid());
+
+			// create and persist the obligation trigger entity
+			ObligationTrigger oeeStatus = new ObligationTrigger();
+			oeeStatus.setPiiId(pii.getHjid());
+			oeeStatus.setTriggerName(trigger.getName());
+			oeeStatus.setAction(action);
+			oeeStatus.setTrigger(trigger);
 
 			oeeStatusDao.persistObject(oeeStatus);
-			
-			if((trigger.getValue()) instanceof TriggerAtTime || (trigger.getValue()) instanceof TriggerPeriodic){
-				timeBasedTriggerHandler.handle(oeeStatus);
+
+			// configure time-based trigger handler
+			if (isTimeBased(trigger)) {
+				timeBasedTriggerHandler.handle(trigger, action, pii);
 			}
-			
 		}
 	}
+
 }

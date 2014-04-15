@@ -36,8 +36,8 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sap.a4cloud.apple.obligation.dao.OEEStatusDao;
-import com.sap.a4cloud.apple.obligation.entity.OEEStatus;
+import com.sap.a4cloud.apple.obligation.dao.ObligationTriggerDao;
+import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
 import com.sap.research.primelife.dao.PiiDao;
 
 import eu.primelife.ppl.pii.impl.PIIType;
@@ -50,7 +50,7 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 			LoggerFactory.getLogger(TimeBasedTriggerHandler.class);
 
 	private static ITimeBasedTriggerHandler instance = null;
-	private OEEStatusDao oeeStatusDao;
+	private ObligationTriggerDao oeeStatusDao;
 	private PiiDao piiDao;
 	private ITimeBasedTriggerFactory factory = new TimeBasedTriggerFactory();
 	private HashMap<Integer, ITimeBasedTrigger> timeBasedTriggers;
@@ -63,11 +63,11 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 	}
 
 	protected TimeBasedTriggerHandler() {
-		this(new OEEStatusDao(), new PiiDao(), new TimeBasedTriggerFactory());
+		this(new ObligationTriggerDao(), new PiiDao(), new TimeBasedTriggerFactory());
 		timeBasedTriggers = new HashMap<Integer, ITimeBasedTrigger>();
 	}
 
-	protected TimeBasedTriggerHandler(OEEStatusDao oeeStatusDao, PiiDao piiDao,
+	protected TimeBasedTriggerHandler(ObligationTriggerDao oeeStatusDao, PiiDao piiDao,
 			ITimeBasedTriggerFactory factory) {
 		this.oeeStatusDao = oeeStatusDao;
 		this.piiDao = piiDao;
@@ -79,9 +79,9 @@ public class TimeBasedTriggerHandler implements ITimeBasedTriggerHandler {
 	public void start() {
 		LOGGER.info("Starting time-based triggers");
 		// re-handle the obligations
-		List<OEEStatus> oeeList = oeeStatusDao.findObjects(OEEStatus.class);
+		List<ObligationTrigger> oeeList = oeeStatusDao.findObjects(ObligationTrigger.class);
 
-		for (OEEStatus oeeStatus : oeeList) {
+		for (ObligationTrigger oeeStatus : oeeList) {
 			long piiId = oeeStatus.getPiiId();
 			PIIType pii = piiDao.findObject(PIIType.class, piiId);
 

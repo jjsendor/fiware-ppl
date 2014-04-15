@@ -27,12 +27,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
  * THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.sap.research.primelife.dc.obligation;
+package com.sap.a4cloud.apple.obligation;
 
 import eu.primelife.ppl.pii.impl.PIIType;
 import eu.primelife.ppl.policy.obligation.impl.ObligationsSet;
 
+/**
+ * Obligation Handler interface for the PPL obligations.
+ * It provides method to manage the Obligation Handler instance, e.g.
+ * adding obligations or removing obligations associate with a specific PII.
+ *
+ * @author Jakub Sendor
+ *
+ */
 public interface IObligationHandler {
+
+	/**
+	 * Configures the Obligation Handler with the new obligations for a given
+	 * PII.
+	 *
+	 * @param obligationSet	the obligation set
+	 * @param pii			the PII with which the obligation set is associated
+	 */
 	public void addObligations(ObligationsSet obligationSet, PIIType pii);
-	public void deleteObligations(PIIType pii);
+
+	/**
+	 * Removes obligations associated with a given PII.
+	 * That method should be used when PII is deleted so that Obligation
+	 * Handler also removes associate obligations.
+	 *
+	 * @param pii	the PII which associated obligations will be removed
+	 */
+	public void removeObligations(PIIType pii);
+
 }
