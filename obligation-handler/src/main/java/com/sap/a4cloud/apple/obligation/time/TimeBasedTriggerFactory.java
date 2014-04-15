@@ -46,7 +46,7 @@ public class TimeBasedTriggerFactory implements ITimeBasedTriggerFactory {
 		}
 		else if (trigger instanceof TriggerPeriodic) {
 			TriggerPeriodic triggerPeriodic = (TriggerPeriodic) trigger;
-			return new TimeBasedTriggerPeriodic(triggerPeriodic , action, pii);
+			return new TimeBasedTriggerPeriodic(triggerPeriodic, action, pii);
 		}
 
 		return null;

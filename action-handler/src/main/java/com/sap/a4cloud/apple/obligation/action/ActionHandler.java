@@ -38,7 +38,7 @@ package com.sap.a4cloud.apple.obligation.action;
 public class ActionHandler implements IActionHandler {
 
 	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.action.IActionHandler#execute(com.sap.research.a4cloud.action.Action)
+	 * @see com.sap.a4cloud.apple.obligation.action.IActionHandler#execute(com.sap.a4cloud.apple.obligation.action.Action)
 	 */
 	@Override
 	public void handle(Action action) {
