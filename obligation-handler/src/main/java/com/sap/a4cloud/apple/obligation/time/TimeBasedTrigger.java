@@ -40,6 +40,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sap.a4cloud.apple.obligation.action.ActionFactory;
 import com.sap.a4cloud.apple.obligation.action.ActionHandler;
 import com.sap.a4cloud.apple.obligation.action.IActionHandler;
 
@@ -55,18 +56,20 @@ public abstract class TimeBasedTrigger implements ITimeBasedTrigger{
 	protected Action action;
 	protected PIIType pii;
 	protected IActionHandler actionHandler;
+	protected ActionFactory actionFactory;
 	protected Timer timer;
 	protected TimerTask timerTask;
 
 	protected TimeBasedTrigger(Action action, PIIType pii) {
-		this(action, pii, new ActionHandler());
+		this(action, pii, new ActionHandler(), new ActionFactory());
 	}
 
 	protected TimeBasedTrigger(Action action, PIIType pii,
-			IActionHandler actionHandler) {
+			IActionHandler actionHandler, ActionFactory actionFactory) {
 		this.action = action;
 		this.pii = pii;
 		this.actionHandler = actionHandler;
+		this.actionFactory = actionFactory;
 		timer = new Timer();
 	}
 
@@ -111,6 +114,17 @@ public abstract class TimeBasedTrigger implements ITimeBasedTrigger{
 				&& xmlGregorianDate.getHour() != DatatypeConstants.FIELD_UNDEFINED
 				&& xmlGregorianDate.getMinute() != DatatypeConstants.FIELD_UNDEFINED
 				&& xmlGregorianDate.getSecond() != DatatypeConstants.FIELD_UNDEFINED;
+	}
+
+	protected synchronized static void tick(Action action, PIIType pii,
+			long time, IActionHandler actionHandler,
+			ActionFactory actionFactory) {
+		// create and trigger the action
+		com.sap.a4cloud.apple.obligation.action.Action actionToHandle =
+				actionFactory.createAction(pii,
+						"Scheduled action triggered at " + time,
+						action);
+		actionHandler.handle(actionToHandle);
 	}
 
 }

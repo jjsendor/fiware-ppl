@@ -57,7 +57,7 @@ public class ActionFactory {
 	 * @param	action	the action element of the obligation
 	 * @return
 	 */
-	public static Action createAction(PIIType pii, String cause,
+	public Action createAction(PIIType pii, String cause,
 			eu.primelife.ppl.policy.obligation.impl.Action action) {
 		if (action instanceof ActionDeletePersonalData) {
 			return new DeleteAction(new PAP(), pii.getHjid());

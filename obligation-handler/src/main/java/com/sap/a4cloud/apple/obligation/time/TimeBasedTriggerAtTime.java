@@ -58,12 +58,13 @@ public class TimeBasedTriggerAtTime extends TimeBasedTrigger {
 
 	protected TimeBasedTriggerAtTime(TriggerAtTime trigger, Action action,
 			PIIType pii) {
-		this(trigger, action, pii, new ActionHandler());
+		this(trigger, action, pii, new ActionHandler(), new ActionFactory());
 	}
 
 	protected TimeBasedTriggerAtTime(TriggerAtTime trigger, Action action,
-			PIIType pii, IActionHandler actionHandler) {
-		super(action, pii, actionHandler);
+			PIIType pii, IActionHandler actionHandler,
+			ActionFactory actionFactory) {
+		super(action, pii, actionHandler, actionFactory);
 		maxDelay = trigger.getMaxDelay();
 		start = trigger.getStart();
 	}
@@ -74,8 +75,11 @@ public class TimeBasedTriggerAtTime extends TimeBasedTrigger {
 		timer = new Timer();
 		timerTask = new TimerTask() {
 			public void run() {
-				TimeBasedTriggerAtTime.tick(action, pii,
-						this.scheduledExecutionTime(), actionHandler);
+				long time = this.scheduledExecutionTime();
+				LOGGER.info("TriggerAtTime for {} triggered at {}",
+						pii.getHjid(), time);
+				TimeBasedTriggerAtTime.tick(action, pii, time, actionHandler,
+						actionFactory);
 				timeBasedTrigger.cancel();
 			}
 		};
@@ -97,19 +101,6 @@ public class TimeBasedTriggerAtTime extends TimeBasedTrigger {
 		else {
 			timer.schedule(timerTask, 1);
 		}
-	}
-
-	protected synchronized static void tick(Action action, PIIType pii,
-			long time, IActionHandler actionHandler) {
-		LOGGER.info("TriggerAtTime for {} triggered at {}", pii.getHjid(),
-				time);
-
-		// create and trigger the action
-		com.sap.a4cloud.apple.obligation.action.Action actionToHandle =
-				ActionFactory.createAction(pii,
-						"Scheduled action triggered at " + time,
-						action);
-		actionHandler.handle(actionToHandle);
 	}
 
 }
