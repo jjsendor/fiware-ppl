@@ -29,33 +29,38 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
-import eu.primelife.ppl.policy.obligation.impl.Trigger;
-import eu.primelife.ppl.policy.obligation.impl.TriggerDataLost;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import eu.primelife.ppl.policy.obligation.impl.TriggerPersonalDataAccessedForPurpose;
 
 /**
- * Event that should be triggered when Data Controller lost control over
- * the personal data.
- *
  * @author Jakub Sendor
  *
  */
-public class PersonalDataLostEvent extends AbstractEvent implements Event {
+public class PersonalDataAcessedEventTest {
 
-	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerDataLost";
+	@Test
+	public void testIsTriggering() {
+		PersonalDataAccessedEvent event = new PersonalDataAccessedEvent();
+		event.setPurpose("http://www.w3.org/2006/01/P3Pv11/marketing");
+		TriggerPersonalDataAccessedForPurpose trigger =
+				new TriggerPersonalDataAccessedForPurpose();
+		List<String> purposes = new ArrayList<String>(3);
+		trigger.setPurpose(purposes);
 
-	@Override
-	public String getName() {
-		return NAME;
-	}
+		// add two purposes different from the event
+		purposes.add("http://www.w3.org/2002/01/P3Pv1/individual-analysis");
+		purposes.add("http://www.w3.org/2002/01/P3Pv1/admin");
+		assertFalse(event.isTriggering(trigger));
 
-	@Override
-	public String toString() {
-		return super.toString() + " lost";
-	}
-
-	@Override
-	public boolean isTriggering(Trigger trigger) {
-		return trigger instanceof TriggerDataLost;
+		// add the same purpose as in the event
+		purposes.add("http://www.w3.org/2006/01/P3Pv11/marketing");
+		assertTrue(event.isTriggering(trigger));
 	}
 
 }

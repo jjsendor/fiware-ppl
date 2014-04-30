@@ -29,6 +29,9 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+import eu.primelife.ppl.policy.obligation.impl.TriggerOnViolation;
+
 /**
  * Event that should be triggered when policy is violated.
  *
@@ -67,6 +70,11 @@ public class OnViolationEvent extends AbstractEvent implements Event {
 	@Override
 	public String toString() {
 		return super.toString() + " policy violated: " + violation;
+	}
+
+	@Override
+	public boolean isTriggering(Trigger trigger) {
+		return trigger instanceof TriggerOnViolation;
 	}
 
 }

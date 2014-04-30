@@ -31,6 +31,8 @@ package com.sap.a4cloud.apple.obligation.event;
 
 import java.util.Date;
 
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+
 /**
  * Interface represents event that triggers obligation in PPL.
  *
@@ -101,5 +103,19 @@ public interface Event {
 	 * @param date	indicates when the event occurred
 	 */
 	public void setDate(Date date);
+
+	/**
+	 * Tests whether the event is matching the trigger. In other words it checks
+	 * whether this event will trigger a particular action that is part of the
+	 * obligation where the given trigger is used.
+	 * E.g. for the trigger personal data accessed it will not only check
+	 * the type of trigger but also that the purpose of the event matches
+	 * that of the trigger.
+	 *
+	 * @param trigger	the trigger element from PPL schema
+	 * @return	<code>true</code> if the event is associated with the trigger,
+	 * 			<code>false</code> otherwise
+	 */
+	boolean isTriggering(Trigger trigger);
 
 }

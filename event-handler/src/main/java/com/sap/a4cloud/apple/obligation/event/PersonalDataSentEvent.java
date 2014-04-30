@@ -29,6 +29,9 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+import eu.primelife.ppl.policy.obligation.impl.TriggerPersonalDataSent;
+
 /**
  * Event that should be triggered when Data Controller shares the personal
  * data with a third party.
@@ -69,6 +72,11 @@ public class PersonalDataSentEvent extends AbstractEvent implements Event {
 	@Override
 	public String toString() {
 		return super.toString() + " sent to " + sharedWith;
+	}
+
+	@Override
+	public boolean isTriggering(Trigger trigger) {
+		return trigger instanceof TriggerPersonalDataSent;
 	}
 
 }

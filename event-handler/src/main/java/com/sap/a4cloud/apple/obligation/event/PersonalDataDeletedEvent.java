@@ -29,6 +29,9 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+import eu.primelife.ppl.policy.obligation.impl.TriggerPersonalDataDeleted;
+
 /**
  * Event that should be triggered when Data Controller deletes the personal
  * data.
@@ -48,6 +51,11 @@ public class PersonalDataDeletedEvent extends AbstractEvent implements Event {
 	@Override
 	public String toString() {
 		return super.toString() + " deleted";
+	}
+
+	@Override
+	public boolean isTriggering(Trigger trigger) {
+		return trigger instanceof TriggerPersonalDataDeleted;
 	}
 
 }

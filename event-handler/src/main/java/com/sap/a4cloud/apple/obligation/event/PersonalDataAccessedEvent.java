@@ -29,6 +29,9 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+import eu.primelife.ppl.policy.obligation.impl.TriggerPersonalDataAccessedForPurpose;
+
 /**
  * Event that should be triggered when Data Controller accesses the personal
  * data.
@@ -68,6 +71,19 @@ public class PersonalDataAccessedEvent extends AbstractEvent implements Event {
 	@Override
 	public String toString() {
 		return super.toString() + " accessed for purpose " + purpose;
+	}
+
+	@Override
+	public boolean isTriggering(Trigger trigger) {
+		if (trigger instanceof TriggerPersonalDataAccessedForPurpose) {
+			// check if the trigger contains the purpose of data access
+			// associated with this event
+			TriggerPersonalDataAccessedForPurpose triggerPDAFP =
+					(TriggerPersonalDataAccessedForPurpose) trigger;
+			return triggerPDAFP.getPurpose().contains(purpose);
+		}
+
+		return false;
 	}
 
 }

@@ -75,7 +75,7 @@ public abstract class AbstractEvent implements Event {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.event.Event#getDate()
+	 * @see com.sap.a4cloud.apple.obligation.event.Event#getDate()
 	 */
 	@Override
 	public Date getDate() {
@@ -83,7 +83,7 @@ public abstract class AbstractEvent implements Event {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.sap.research.a4cloud.event.Event#setDate(java.util.Date)
+	 * @see com.sap.a4cloud.apple.obligation.event.Event#setDate(java.util.Date)
 	 */
 	@Override
 	public void setDate(Date date) {
@@ -95,4 +95,5 @@ public abstract class AbstractEvent implements Event {
 		return "Event associated with personal data " + piiAttributeName
 				+ " belonging to " + piiOwner;
 	}
+
 }

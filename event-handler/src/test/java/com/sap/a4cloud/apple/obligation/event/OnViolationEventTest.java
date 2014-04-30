@@ -29,33 +29,23 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
-import eu.primelife.ppl.policy.obligation.impl.Trigger;
-import eu.primelife.ppl.policy.obligation.impl.TriggerDataLost;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+import eu.primelife.ppl.policy.obligation.impl.TriggerOnViolation;
 
 /**
- * Event that should be triggered when Data Controller lost control over
- * the personal data.
- *
  * @author Jakub Sendor
  *
  */
-public class PersonalDataLostEvent extends AbstractEvent implements Event {
+public class OnViolationEventTest {
 
-	private static final String NAME = "{http://www.primelife.eu/ppl/obligation}TriggerDataLost";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + " lost";
-	}
-
-	@Override
-	public boolean isTriggering(Trigger trigger) {
-		return trigger instanceof TriggerDataLost;
+	@Test
+	public void testIsTriggering() {
+		OnViolationEvent event = new OnViolationEvent();
+		TriggerOnViolation trigger = new TriggerOnViolation();
+		assertTrue(event.isTriggering(trigger));
 	}
 
 }
