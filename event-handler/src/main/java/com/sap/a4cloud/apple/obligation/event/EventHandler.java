@@ -29,19 +29,100 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation.event;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sap.a4cloud.apple.obligation.IObligationHandler;
+import com.sap.a4cloud.apple.obligation.ObligationHandler;
+import com.sap.a4cloud.apple.obligation.action.ActionFactory;
+import com.sap.a4cloud.apple.obligation.action.ActionHandler;
+import com.sap.a4cloud.apple.obligation.action.IActionHandler;
+import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
+import com.sap.research.primelife.dao.PiiDao;
+
+import eu.primelife.ppl.pii.impl.PIIType;
+import eu.primelife.ppl.policy.obligation.impl.Action;
+import eu.primelife.ppl.policy.obligation.impl.Trigger;
+
 /**
  * @author Jakub Sendor
  *
  */
 public class EventHandler implements IEventHandler {
 
+	private final static Logger LOGGER = LoggerFactory.getLogger(
+			EventHandler.class);
+
+	private IObligationHandler obligationHandler;
+	private PiiDao piiDao;
+	private IActionHandler actionHandler;
+	private ActionFactory actionFactory;
+
+	public EventHandler() {
+		obligationHandler = ObligationHandler.getInstance();
+		piiDao = new PiiDao();
+		actionHandler = new ActionHandler();
+		actionFactory = new ActionFactory();
+	}
+
+
+	public EventHandler(IObligationHandler obligationHandler, PiiDao piiDao,
+			IActionHandler actionHandler, ActionFactory actionFactory) {
+		super();
+		this.obligationHandler = obligationHandler;
+		this.piiDao = piiDao;
+		this.actionHandler = actionHandler;
+		this.actionFactory = actionFactory;
+	}
+
+
 	/* (non-Javadoc)
 	 * @see com.sap.a4cloud.apple.obligation.event.IEventHandler#trigger(com.sap.a4cloud.apple.obligation.event.Event)
 	 */
 	@Override
 	public void trigger(Event event) {
-		// TODO Auto-generated method stub
+		Long piiId = event.getPiiId();
+		PIIType pii = piiDao.findObject(PIIType.class, piiId);
 
+		if (pii != null) {
+			// retrieve obligation-trigger list
+			List<ObligationTrigger> otList =
+					obligationHandler.getObligations(piiId, event.getName());
+			String cause = event.toString();
+			for (ObligationTrigger ot : otList) {
+				Trigger trigger = ot.getTrigger();
+
+				// check whether the trigger corresponds with the event
+				if (event.isTriggering(trigger)) {
+					Action action = ot.getAction();
+					executeAction(pii, action, cause);
+				}
+			}
+		}
+		else {
+			LOGGER.warn("No PII with id {} found for the event {}",
+					piiId, event);
+		}
+	}
+
+	/**
+	 * Executes the action by calling the
+	 * {@link ActionHandler#handle(com.sap.a4cloud.apple.obligation.action.Action)}
+	 * method.
+	 *
+	 * @param pii		the PII associated with the obligation
+	 * @param action	the action element from the PPL policy
+	 * @param cause		the cause of the action to be triggered
+	 */
+	private void executeAction(PIIType pii, Action action, String cause) {
+		// create and trigger the action
+		com.sap.a4cloud.apple.obligation.action.Action actionToHandle =
+				actionFactory.createAction(pii, cause, action);
+		LOGGER.info("Triggering action execution {} for PII {}",
+				action, pii.getHjid());
+		actionHandler.handle(actionToHandle);
 	}
 
 }

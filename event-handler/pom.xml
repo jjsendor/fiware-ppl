@@ -15,5 +15,15 @@
       <artifactId>ppl-schema</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>obligation-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.research.primelife</groupId>
+      <artifactId>action-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
