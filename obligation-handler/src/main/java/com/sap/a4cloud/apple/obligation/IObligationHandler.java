@@ -29,6 +29,10 @@
  ******************************************************************************/
 package com.sap.a4cloud.apple.obligation;
 
+import java.util.List;
+
+import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
+
 import eu.primelife.ppl.pii.impl.PIIType;
 import eu.primelife.ppl.policy.obligation.impl.ObligationsSet;
 
@@ -50,6 +54,17 @@ public interface IObligationHandler {
 	 * @param pii			the PII with which the obligation set is associated
 	 */
 	public void addObligations(ObligationsSet obligationSet, PIIType pii);
+
+	/**
+	 * Retrieves all of the {@link ObligationTrigger} objects associated with
+	 * a given PII and trigger.
+	 *
+	 * @param piiId			the PII id
+	 * @param triggerName	the trigger name, as in PPL schema
+	 * @return	list of the {@link ObligationTrigger} objects
+	 */
+	public List<ObligationTrigger> getObligations(Long piiId,
+			String triggerName);
 
 	/**
 	 * Removes obligations associated with a given PII.

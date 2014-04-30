@@ -82,25 +82,32 @@ public class ObligationHandler implements IObligationHandler {
 		}
 	}
 
+	@Override
+	public List<ObligationTrigger> getObligations(Long piiId,
+			String triggerName) {
+		return obligationTriggerDao.findByPiiIdAndTriggerName(piiId,
+				triggerName);
+	}
+
 	public void removeObligations(PIIType pii) {
-		List<ObligationTrigger> oeeStatusList =
+		List<ObligationTrigger> otList =
 				obligationTriggerDao.findByPiiId(pii.getHjid());
 
 		// remove each obligation trigger one by one
-		for (ObligationTrigger oeeStatus : oeeStatusList){
-			deleteObligation(oeeStatus);
+		for (ObligationTrigger ot : otList){
+			deleteObligation(ot);
 		}
 	}
 
-	private void deleteObligation(ObligationTrigger oeeStatus) {
-		Trigger trigger = oeeStatus.getTrigger();
-		Long piiId = oeeStatus.getPiiId();
+	private void deleteObligation(ObligationTrigger ot) {
+		Trigger trigger = ot.getTrigger();
+		Long piiId = ot.getPiiId();
 
 		if (isTimeBased(trigger)) {
 			timeBasedTriggerHandler.unhandle(trigger, piiId);
 		}
 
-		obligationTriggerDao.deleteObject(oeeStatus);
+		obligationTriggerDao.deleteObject(ot);
 	}
 
 	private boolean isTimeBased(Trigger trigger) {
@@ -121,13 +128,13 @@ public class ObligationHandler implements IObligationHandler {
 					trigger.getName(), pii.getHjid());
 
 			// create and persist the obligation trigger entity
-			ObligationTrigger oeeStatus = new ObligationTrigger();
-			oeeStatus.setPiiId(pii.getHjid());
-			oeeStatus.setTriggerName(trigger.getName());
-			oeeStatus.setAction(action);
-			oeeStatus.setTrigger(trigger);
+			ObligationTrigger ot = new ObligationTrigger();
+			ot.setPiiId(pii.getHjid());
+			ot.setTriggerName(trigger.getName());
+			ot.setAction(action);
+			ot.setTrigger(trigger);
 
-			obligationTriggerDao.persistObject(oeeStatus);
+			obligationTriggerDao.persistObject(ot);
 
 			// configure time-based trigger handler
 			if (isTimeBased(trigger)) {

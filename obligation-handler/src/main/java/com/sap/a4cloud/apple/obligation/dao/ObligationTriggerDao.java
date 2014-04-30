@@ -32,6 +32,7 @@ package com.sap.a4cloud.apple.obligation.dao;
 import java.util.List;
 
 import javax.persistence.Query;
+
 import com.sap.research.primelife.dao.DaoImpl;
 import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
 
@@ -44,29 +45,30 @@ import com.sap.a4cloud.apple.obligation.entity.ObligationTrigger;
 public class ObligationTriggerDao extends DaoImpl<ObligationTrigger> {
 
 	/**
-	 * Looks for an {@link ObligationTrigger} associated with a PII and
-	 * the trigger type.
+	 * Looks for the list of {@link ObligationTrigger} objects associated with
+	 * a PII and the trigger type.
 	 *
 	 * @param piiId			the PII id
 	 * @param triggerName	the trigger name
 	 *
-	 * @return	{@link ObligationTrigger} associated with the given PII id and
-	 * 			the trigger type
+	 * @return	list of {@link ObligationTrigger} associated with the given
+	 * 			PII id and the trigger type
 	 */
-	public ObligationTrigger findByPiiIdAndTriggerName(Long piiId,
+	@SuppressWarnings("unchecked")
+	public List<ObligationTrigger> findByPiiIdAndTriggerName(Long piiId,
 			String triggerName) {
 		Query query = em.createQuery("SELECT ot FROM "
 					+ ObligationTrigger.class.getName()
 					+ " ot WHERE ot.piiId = :piiId"
 					+ " and ot.triggerName= :triggerName");
 		query.setParameter("piiId", piiId);
-		query.setParameter("triggerType", triggerName);
+		query.setParameter("triggerName", triggerName);
 
 		if (query.getResultList().isEmpty()) {
 			return null;
 		}
 
-		return (ObligationTrigger) query.getResultList().get(0);
+		return (List<ObligationTrigger>) query.getResultList();
 	}
 
 	/**
